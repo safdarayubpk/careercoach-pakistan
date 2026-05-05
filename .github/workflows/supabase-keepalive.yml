@@ -1,0 +1,33 @@
+name: Supabase Keep-Alive
+
+# Runs every 4 days to prevent Supabase free tier from pausing due to inactivity.
+# Supabase pauses after 7 days — this pings every 4 days as a safe buffer.
+
+on:
+  schedule:
+    - cron: '0 9 */4 * *'   # Every 4 days at 9:00 AM UTC
+  workflow_dispatch:          # Allow manual trigger from GitHub Actions tab
+
+jobs:
+  ping:
+    name: Ping Supabase Database
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Ping Supabase REST API
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
+            "${{ secrets.SUPABASE_URL }}/rest/v1/users?select=id&limit=1")
+
+          echo "Supabase ping status: $STATUS"
+
+          if [ "$STATUS" -ge 200 ] && [ "$STATUS" -lt 300 ]; then
+            echo "✓ Supabase is active and responding."
+          elif [ "$STATUS" = "406" ]; then
+            echo "✓ Supabase is active (406 = table exists, RLS blocked anon read — expected)."
+          else
+            echo "✗ Unexpected status $STATUS — check secrets and Supabase project."
+            exit 1
+          fi
