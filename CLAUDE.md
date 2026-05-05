@@ -10,7 +10,7 @@ This file provides guidance to Claude Code when working in the `careercoach-paki
 Pakistani professionals pay PKR 999/month instead of PKR 7,000/month for global tools (Final Round AI, Huru.ai).
 Core differentiator: JD-paste → tailored questions + Urdu language support.
 
-**Status:** Pre-build. Specs written. Starting Phase 1 (Auth + Setup).
+**Status:** Phase 1 in progress. Auth UI designed. Implementation next.
 **Repo:** github.com/safdarayubpk/careercoach-pakistan
 **Deploy:** Vercel (full-stack, not static)
 
@@ -139,6 +139,9 @@ Response must always be valid JSON — use `response_format: { type: "json_objec
 - **ShadCN theme:** Blue, radius 0.5rem
 
 ### Key UI Patterns
+- Landing page: Split hero — left pitch + CTA, right live product preview mockup
+- Landing nav: Logo + Features/Pricing links + "Sign In" (returning users) + hero "Start Free Trial" CTA (new users)
+- App shell: Blue top nav bar (#1E40AF) — logo left, nav links center, avatar + name right
 - Question screen: blue left-border card for question text, orange tip box, green JD context pill
 - Feedback screen: green card (correct), red card (missing), blue card (improve tip)
 - Score display: gradient blue card with large number `/10`
@@ -175,7 +178,7 @@ Always read the relevant spec before implementing a feature.
 
 ```
 Phase 0: Project setup (Next.js + Supabase + Groq + Stripe configured) ✓ DONE
-Phase 1: Auth (Google login, protected routes, user table)
+Phase 1: Auth (Google login, protected routes, user table) ← IN PROGRESS
 Phase 2: Interview session (setup form, question screen, answer input)
 Phase 3: AI feedback (Groq integration, scoring, feedback display)
 Phase 4: Session report + progress dashboard
@@ -198,8 +201,11 @@ Phase 8: Launch prep (domain, env vars, Vercel deploy, smoke test)
 
 ## Skills Installed
 
-`.agents/skills/` contains skills for: spec-driven-development, browsing-with-playwright, fetch-library-docs, doc-coauthoring, and more.
-Claude Code reads and applies these automatically — no manual invocation needed.
+**Global** (`~/.agents/skills/`): `supabase`, `supabase-postgres-best-practices`, `nextjs-supabase-auth`, `nextjs-seo`, `svg-logo-designer`, `ui-ux-pro-max`, `find-skills`
+
+**Project** (`.agents/skills/`): `spec-driven-development`, `shadcn`, `framer-motion`, `accessibility`, `landing-page-design`, `scroll-experience`, `browsing-with-playwright`, `fetch-library-docs`, `doc-coauthoring`, `theme-factory`, `interactive-portfolio`, `skill-creator`, `skill-validator`, `tailored-resume-generator`, `discovery-interview`, `internal-comms`, `pdf`
+
+Invoke via the `Skill` tool — do not read skill files directly.
 
 ## Competitor Context
 
