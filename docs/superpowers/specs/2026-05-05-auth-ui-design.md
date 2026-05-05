@@ -69,41 +69,55 @@ DashboardShell (placeholder — replaced in Phase 4):
 
 ### Auth Plumbing (no UI)
 
+**Required install:** `pnpm add @supabase/supabase-js @supabase/ssr`
+
 | File | Purpose |
 |---|---|
-| `src/lib/supabase/client.ts` | Browser-side Supabase client |
-| `src/lib/supabase/server.ts` | Server-side Supabase client (cookies) |
+| `src/lib/supabase/client.ts` | Browser-side Supabase client (`createBrowserClient` from `@supabase/ssr`) |
+| `src/lib/supabase/server.ts` | Server-side Supabase client (`createServerClient` from `@supabase/ssr`, reads cookies) |
 | `src/app/auth/callback/route.ts` | Exchanges OAuth code, upserts user row, redirects to dashboard |
-| `src/middleware.ts` | Protects `/app/*`, checks trial + subscription status |
+| `src/middleware.ts` | Protects `/app/*`, refreshes session, checks trial + subscription status |
 
 ---
 
 ## Components
 
 ### `src/components/auth/sign-in-button.tsx`
+- **Must be `'use client'`** — calls `supabase.auth.signInWithOAuth` (client-side API)
 - Props: `variant: "hero" | "nav"`
 - `hero`: larger button, white background, Google logo SVG, "Start Free Trial" label
 - `nav`: smaller button, fits nav bar, "Sign In" label
-- On click: `supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: '/auth/callback' } })`
+- On click: `supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: \`${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback\` } })`
+- `NEXT_PUBLIC_SITE_URL` = `http://localhost:3000` in dev, `https://careercoach.pk` in production
 
 ### `src/components/auth/sign-out-button.tsx`
+- **Must be `'use client'`** — calls `supabase.auth.signOut()` and `router.push` (client-side APIs)
 - On click: `supabase.auth.signOut()` then `router.push('/')`
-- Sits in app nav beside avatar
+- Sits in app nav beside avatar — extracted as a Client Component so `AppNav` can stay a Server Component
 
 ### `src/components/layout/landing-nav.tsx`
+- **Server Component** — no interactivity needed (sign-in is handled by the nested `<SignInButton />` Client Component)
 - Blue bar (`#1E40AF`), white text
-- Logo left | Features + Pricing anchor links center (non-functional in Phase 1) | `<SignInButton variant="nav" />` right
+- Logo left | Features + Pricing as plain `<span>` (non-functional in Phase 1, no `href`) center | `<SignInButton variant="nav" />` right
 - No mobile hamburger — Phase 7
 
-### `src/components/layout/app-nav.tsx`
-- Blue bar (`#1E40AF`), white text
-- Logo left | Dashboard + Sessions + Billing links center | Avatar + name + `<SignOutButton />` right
-- Avatar: `user.user_metadata.avatar_url` — falls back to initials circle if null
+### `src/app/(marketing)/layout.tsx`
+- Wraps the marketing route group
+- Renders `<LandingNav />` above `{children}`
+- No other layout concerns in Phase 1 (footer, etc. come in Phase 6)
 
-### `src/components/layout/dashboard-shell.tsx`
-- Content wrapper for the dashboard page (Phase 1 stub)
-- "Welcome back, {name}" + placeholder card
-- Replaced with real content in Phase 4
+### `src/components/layout/app-nav.tsx`
+- **Server Component** — fetches user server-side via `createServerClient()` + `supabase.auth.getUser()`
+- Blue bar (`#1E40AF`), white text
+- Logo left | nav links center | Avatar + name + `<SignOutButton />` right
+- Nav links: `Dashboard` as `<Link>`. `Sessions` and `Billing` rendered as plain `<span>` (non-interactive, no `<Link>`) until Phase 2 and Phase 5 ship their routes — avoids 404s
+- Avatar: `user.user_metadata.avatar_url` from Google. Fallback: initials circle using first letter of `full_name` if available, else first two characters of `email`. Both `full_name` and `avatar_url` can be null from Google — always check both
+- `<SignOutButton />` is a nested Client Component inside this Server Component — the only interactive element
+
+### `src/app/(app)/dashboard/page.tsx` (stub — no separate component)
+- Server Component — fetches user via `supabase.auth.getUser()` for the welcome message
+- Renders "Welcome back, {name}" heading + placeholder card "Your sessions will appear here" inline
+- No separate `dashboard-shell` component — this is throwaway content replaced in Phase 4, not worth abstracting
 
 ---
 
@@ -122,13 +136,18 @@ User clicks "Start Free Trial" or "Sign In"
 
 ### Every `/app/*` request
 ```
-middleware.ts
-  → No session → redirect to /
-  → Has session → fetch users row (is_subscribed, trial_ends_at)
-  → Trial active OR is_subscribed = true → allow through
+middleware.ts  (@supabase/ssr — NOT @supabase/auth-helpers-nextjs)
+  → createServerClient() with cookie handlers that read from request and write to response
+  → supabase.auth.getUser() — MUST use getUser(), not getSession() (getSession() is unsafe server-side)
+  → Refreshes auth token and forwards updated cookies in response (prevents token expiry lockout)
+  → No user → redirect to /
+  → Has user → fetch users row (is_subscribed, trial_ends_at)
+  → Trial active OR is_subscribed = true → allow through (forward response with refreshed cookies)
   → Trial expired AND not subscribed → redirect to /app/billing
   → /app/billing itself always accessible (avoids redirect loop)
 ```
+
+**Critical:** middleware must always return the `response` object (with updated cookies) on the allow-through path — not a bare `NextResponse.next()`. Dropping the cookies breaks session persistence.
 
 ### Sign-out
 ```
@@ -172,28 +191,27 @@ Run after implementation. Covers the key acceptance criteria from `docs/specs/01
 src/
   components/
     auth/
-      sign-in-button.tsx
-      sign-out-button.tsx
+      sign-in-button.tsx   ← 'use client'
+      sign-out-button.tsx  ← 'use client'
     layout/
-      landing-nav.tsx
-      app-nav.tsx
-      dashboard-shell.tsx
+      landing-nav.tsx      ← Server Component
+      app-nav.tsx          ← Server Component (contains SignOutButton client island)
   lib/
     supabase/
-      client.ts
-      server.ts
+      client.ts            ← createBrowserClient (@supabase/ssr)
+      server.ts            ← createServerClient (@supabase/ssr)
   app/
     (marketing)/
-      page.tsx          ← landing page stub
-      layout.tsx        ← uses LandingNav
+      page.tsx             ← landing page stub (hero + sign-in)
+      layout.tsx           ← renders LandingNav above {children}
     (app)/
       dashboard/
-        page.tsx        ← uses DashboardShell
-      layout.tsx        ← uses AppNav, auth guard
+        page.tsx           ← stub: "Welcome back" + placeholder (inline, no separate component)
+      layout.tsx           ← renders AppNav, auth guard via middleware
     auth/
       callback/
-        route.ts
-  middleware.ts
+        route.ts           ← OAuth code exchange + user upsert
+  middleware.ts            ← @supabase/ssr session refresh + /app/* protection
 ```
 
 ---
