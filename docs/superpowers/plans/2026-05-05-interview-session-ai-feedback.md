@@ -393,6 +393,7 @@ Create `src/components/session/role-autocomplete.tsx`:
 import { useState, useRef, useEffect } from 'react'
 
 const PREDEFINED_ROLES = [
+  // Tech
   'Software Engineer',
   'Frontend Developer',
   'Backend Developer',
@@ -401,18 +402,46 @@ const PREDEFINED_ROLES = [
   'DevOps Engineer',
   'Data Analyst',
   'Data Scientist',
-  'Product Manager',
-  'Business Analyst',
   'UI/UX Designer',
   'QA Engineer',
-  'System Architect',
-  'Network Engineer',
   'Cybersecurity Analyst',
-  'SAP Consultant',
-  'Project Manager',
-  'Technical Support Engineer',
-  'Database Administrator',
   'Machine Learning Engineer',
+  // Finance & Banking
+  'Accountant',
+  'Financial Analyst',
+  'Bank Officer',
+  'Auditor',
+  'Tax Consultant',
+  // Engineering (non-IT)
+  'Civil Engineer',
+  'Mechanical Engineer',
+  'Electrical Engineer',
+  'Structural Engineer',
+  // Marketing & Sales
+  'Marketing Manager',
+  'Sales Executive',
+  'Digital Marketer',
+  'Brand Manager',
+  // Healthcare
+  'Medical Officer',
+  'Pharmacist',
+  'Nurse',
+  'Lab Technician',
+  // Education
+  'Teacher',
+  'Lecturer',
+  'School Administrator',
+  // HR & Operations
+  'HR Manager',
+  'Recruitment Officer',
+  'Operations Manager',
+  'Supply Chain Manager',
+  // Other
+  'Project Manager',
+  'Business Analyst',
+  'Legal Advisor',
+  'Content Writer',
+  'Journalist',
 ]
 
 interface RoleAutocompleteProps {

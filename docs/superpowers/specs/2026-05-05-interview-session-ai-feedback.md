@@ -91,8 +91,24 @@ create policy "Users can CRUD own answers"
 | Interview Type | Pill toggle: Technical / Behavioral / Mixed | Yes | Mixed |
 | JD Text | Textarea | No | — |
 
-### Predefined Roles (~20 Pakistani market roles)
-Software Engineer, Frontend Developer, Backend Developer, Full Stack Developer, Mobile Developer, DevOps Engineer, Data Analyst, Data Scientist, Product Manager, Business Analyst, UI/UX Designer, QA Engineer, System Architect, Network Engineer, Cybersecurity Analyst, SAP Consultant, Project Manager, Technical Support Engineer, Database Administrator, Machine Learning Engineer
+### Predefined Roles (~40 Pakistani market roles, across all sectors)
+**Tech:** Software Engineer, Frontend Developer, Backend Developer, Full Stack Developer, Mobile Developer, DevOps Engineer, Data Analyst, Data Scientist, UI/UX Designer, QA Engineer, Cybersecurity Analyst, Machine Learning Engineer
+
+**Finance & Banking:** Accountant, Financial Analyst, Bank Officer, Auditor, Tax Consultant
+
+**Engineering (non-IT):** Civil Engineer, Mechanical Engineer, Electrical Engineer, Structural Engineer
+
+**Marketing & Sales:** Marketing Manager, Sales Executive, Digital Marketer, Brand Manager
+
+**Healthcare:** Medical Officer, Pharmacist, Nurse, Lab Technician
+
+**Education:** Teacher, Lecturer, School Administrator
+
+**HR & Operations:** HR Manager, Recruitment Officer, Operations Manager, Supply Chain Manager
+
+**Other:** Project Manager, Business Analyst, Legal Advisor, Content Writer, Journalist
+
+Any role not in this list can be typed freely — the autocomplete shows "+ Use '{input}' as custom role" and Groq handles any profession.
 
 ### Role Autocomplete Behaviour
 - Type to filter the predefined list
