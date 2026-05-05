@@ -9,6 +9,7 @@ interface Props {
 
 export default function AnswerForm({ onSubmit, loading }: Props) {
   const [answer, setAnswer] = useState('')
+  const [interimText, setInterimText] = useState('')
   const [voiceSupported, setVoiceSupported] = useState(false)
   const [listening, setListening] = useState(false)
   const recognitionRef = useRef<SpeechRecognition | null>(null)
@@ -24,27 +25,39 @@ export default function AnswerForm({ onSubmit, loading }: Props) {
 
     if (listening) {
       recognitionRef.current?.stop()
-      setListening(false)
       return
     }
 
     const recognition = new SR()
     recognition.lang = 'ur-PK'
-    recognition.interimResults = false
-    recognition.continuous = false
+    recognition.interimResults = true   // live preview as you speak
+    recognition.continuous = true       // keep listening until user clicks Stop
     recognitionRef.current = recognition
 
     recognition.onstart = () => setListening(true)
-    recognition.onend = () => setListening(false)
+    recognition.onend = () => {
+      setListening(false)
+      setInterimText('')
+    }
     recognition.onerror = (e: SpeechRecognitionErrorEvent) => {
       setListening(false)
+      setInterimText('')
       if (e.error === 'not-allowed') {
         alert('Microphone access denied')
       }
     }
     recognition.onresult = (e: SpeechRecognitionEvent) => {
-      const transcript = e.results[0]?.[0]?.transcript ?? ''
-      setAnswer(prev => (prev ? `${prev} ${transcript}` : transcript))
+      let interim = ''
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        const transcript = e.results[i][0].transcript
+        if (e.results[i].isFinal) {
+          // Append finalized speech to the saved answer
+          setAnswer(prev => (prev ? `${prev} ${transcript}` : transcript))
+        } else {
+          interim += transcript
+        }
+      }
+      setInterimText(interim)
     }
 
     recognition.start()
@@ -65,7 +78,11 @@ export default function AnswerForm({ onSubmit, loading }: Props) {
         disabled={loading}
         className="w-full resize-none rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-[#1E40AF] focus:outline-none focus:ring-1 focus:ring-[#1E40AF]"
       />
-      {answer.trim().length > 0 && answer.trim().length < 10 && (
+      {/* Live interim transcription preview */}
+      {interimText && (
+        <p className="mt-1 text-xs italic text-gray-400">{interimText}…</p>
+      )}
+      {!interimText && answer.trim().length > 0 && answer.trim().length < 10 && (
         <p className="mt-1 text-xs text-gray-400">Please give a more complete answer.</p>
       )}
       <div className="mt-3 flex gap-3">
