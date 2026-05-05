@@ -26,12 +26,9 @@ export default async function AppNav() {
         <Link href="/app/dashboard" className="hover:text-white/80 transition-colors">
           Dashboard
         </Link>
-        <span
-          className="opacity-40 cursor-not-allowed select-none"
-          title="Coming in Phase 2"
-        >
+        <Link href="/app/session/setup" className="hover:text-white/80 transition-colors">
           Sessions
-        </span>
+        </Link>
         <span
           className="opacity-40 cursor-not-allowed select-none"
           title="Coming in Phase 5"
