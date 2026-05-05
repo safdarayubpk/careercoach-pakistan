@@ -40,9 +40,11 @@ export default function SessionPlayer({ question, session, questionNumber }: Pro
   const [feedback, setFeedback] = useState<FeedbackData | null>(null)
   const [feedbackUnavailable, setFeedbackUnavailable] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
 
   async function handleSubmitAnswer(answerText: string) {
     setSubmitting(true)
+    setSubmitError(null)
     try {
       const res = await fetch('/api/feedback', {
         method: 'POST',
@@ -63,11 +65,13 @@ export default function SessionPlayer({ question, session, questionNumber }: Pro
       } else {
         setFeedbackUnavailable(true)
       }
+      // Answer reached the server — transition to feedback view
+      setMode('feedback')
     } catch {
-      setFeedbackUnavailable(true)
+      // Network error — answer was not saved, let user retry
+      setSubmitError('Connection error. Please check your connection and try again.')
     } finally {
       setSubmitting(false)
-      setMode('feedback')
     }
   }
 
@@ -75,7 +79,7 @@ export default function SessionPlayer({ question, session, questionNumber }: Pro
     setMode('question')
     setFeedback(null)
     setFeedbackUnavailable(false)
-    router.push(pathname)
+    setSubmitError(null)
     router.refresh()
   }
 
@@ -95,6 +99,11 @@ export default function SessionPlayer({ question, session, questionNumber }: Pro
       <QuestionCard question={question} />
       <div className="mt-4">
         <AnswerForm onSubmit={handleSubmitAnswer} loading={submitting} />
+        {submitError && (
+          <p className="mt-2 rounded-md bg-red-50 px-3 py-2 text-sm text-red-600">
+            {submitError}
+          </p>
+        )}
       </div>
     </>
   )

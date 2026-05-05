@@ -14,6 +14,7 @@ export async function POST(request: Request) {
     if (answerText.trim().length < 10) {
       return NextResponse.json({ error: 'Answer too short' }, { status: 400 })
     }
+    const cappedAnswer = answerText.slice(0, 5000)
 
     const supabase = await createClient()
     const {
@@ -41,6 +42,18 @@ export async function POST(request: Request) {
 
     if (!question) return NextResponse.json({ error: 'Question not found' }, { status: 404 })
 
+    // Prevent duplicate answer submission
+    const { data: existing } = await supabase
+      .from('answers')
+      .select('id')
+      .eq('question_id', questionId)
+      .eq('user_id', user.id)
+      .maybeSingle()
+
+    if (existing) {
+      return NextResponse.json({ error: 'Already answered' }, { status: 409 })
+    }
+
     // Call Groq for evaluation
     let feedbackJson: Record<string, unknown> | null = null
     let score: number | null = null
@@ -56,7 +69,7 @@ export async function POST(request: Request) {
           },
           {
             role: 'user',
-            content: `Question: ${question.text}\nCategory: ${question.category}\nCandidate Answer: ${answerText}\nRole: ${session.role} | Level: ${session.level}\nJD Context: ${session.jd_text || 'Not provided'}`,
+            content: `Question: ${question.text}\nCategory: ${question.category}\nCandidate Answer: ${cappedAnswer}\nRole: ${session.role} | Level: ${session.level}\nJD Context: ${session.jd_text || 'Not provided'}`,
           },
         ],
         response_format: { type: 'json_object' },
@@ -77,7 +90,7 @@ export async function POST(request: Request) {
     const { error: insertError } = await supabase.from('answers').insert({
       question_id: questionId,
       user_id: user.id,
-      answer_text: answerText.trim(),
+      answer_text: cappedAnswer.trim(),
       score,
       feedback_json: feedbackJson,
     })

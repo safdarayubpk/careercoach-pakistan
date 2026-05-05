@@ -15,6 +15,8 @@ export async function POST(request: Request) {
     if (!VALID_LEVELS.includes(level) || !VALID_TYPES.includes(interviewType)) {
       return NextResponse.json({ error: 'Invalid level or interview type' }, { status: 400 })
     }
+    const cappedRole = role.trim().slice(0, 200)
+    const cappedJd = jdText ? jdText.slice(0, 2000) : null
 
     // Get authenticated user
     const supabase = await createClient()
@@ -34,7 +36,7 @@ export async function POST(request: Request) {
         },
         {
           role: 'user',
-          content: `Role: ${role}\nLevel: ${level}\nInterview Type: ${interviewType}\nJob Description: ${jdText || 'Not provided'}`,
+          content: `Role: ${cappedRole}\nLevel: ${level}\nInterview Type: ${interviewType}\nJob Description: ${cappedJd || 'Not provided'}`,
         },
       ],
       response_format: { type: 'json_object' },
@@ -66,16 +68,21 @@ export async function POST(request: Request) {
         throw new Error('Groq returned invalid question format')
       }
     }
+    // Validate no duplicate order_index values
+    const indices = questions.map((q: { order_index: number }) => q.order_index)
+    if (new Set(indices).size !== 10) {
+      throw new Error('Groq returned duplicate order_index values')
+    }
 
     // Insert session
     const { data: session, error: sessionError } = await supabase
       .from('sessions')
       .insert({
         user_id: user.id,
-        role: role.trim(),
+        role: cappedRole,
         level,
         interview_type: interviewType,
-        jd_text: jdText || null,
+        jd_text: cappedJd,
       })
       .select('id')
       .single()

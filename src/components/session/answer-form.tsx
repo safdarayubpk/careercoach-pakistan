@@ -15,6 +15,7 @@ export default function AnswerForm({ onSubmit, loading }: Props) {
 
   useEffect(() => {
     setVoiceSupported(!!(window.SpeechRecognition || window.webkitSpeechRecognition))
+    return () => { recognitionRef.current?.abort() }
   }, [])
 
   function handleVoice() {

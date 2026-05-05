@@ -42,7 +42,7 @@ export default function SetupForm() {
       const { sessionId } = await res.json()
       router.push(`/app/session/${sessionId}/question`)
     } catch {
-      setError("Couldn't generate questions. Please try again.")
+      setError("Couldn't generate questions. Try again.")
       setLoading(false)
     }
   }
