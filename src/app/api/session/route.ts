@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { groq } from '@/lib/groq'
+import { VALID_LEVELS, VALID_TYPES, VALID_CATEGORIES } from '@/types/session'
 
 export async function POST(request: Request) {
   try {
@@ -11,9 +12,7 @@ export async function POST(request: Request) {
     if (!role?.trim() || !level || !interviewType) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
-    const validLevels = ['Junior', 'Mid', 'Senior']
-    const validTypes = ['Technical', 'Behavioral', 'Mixed']
-    if (!validLevels.includes(level) || !validTypes.includes(interviewType)) {
+    if (!VALID_LEVELS.includes(level) || !VALID_TYPES.includes(interviewType)) {
       return NextResponse.json({ error: 'Invalid level or interview type' }, { status: 400 })
     }
 
@@ -44,11 +43,28 @@ export async function POST(request: Request) {
     const content = completion.choices[0]?.message?.content
     if (!content) throw new Error('Empty Groq response')
 
-    const parsed = JSON.parse(content)
-    const questions: Array<{ text: string; category: string; order_index: number }> =
-      parsed.questions
+    let parsed: { questions?: unknown }
+    try {
+      parsed = JSON.parse(content)
+    } catch {
+      throw new Error('Groq returned malformed JSON')
+    }
+
+    const questions = parsed.questions
     if (!Array.isArray(questions) || questions.length !== 10) {
-      throw new Error('Invalid questions format from Groq')
+      throw new Error('Groq did not return exactly 10 questions')
+    }
+
+    // Per-item validation
+    for (const q of questions) {
+      if (
+        typeof q.text !== 'string' || !q.text.trim() ||
+        !VALID_CATEGORIES.includes(q.category) ||
+        typeof q.order_index !== 'number' ||
+        q.order_index < 0 || q.order_index > 9
+      ) {
+        throw new Error('Groq returned invalid question format')
+      }
     }
 
     // Insert session
@@ -66,9 +82,9 @@ export async function POST(request: Request) {
 
     if (sessionError || !session) throw new Error('Failed to create session')
 
-    // Insert questions
+    // Insert questions — clean up session row on failure
     const { error: questionsError } = await supabase.from('questions').insert(
-      questions.map(q => ({
+      questions.map((q: { text: string; category: string; order_index: number }) => ({
         session_id: session.id,
         text: q.text,
         category: q.category,
@@ -76,7 +92,11 @@ export async function POST(request: Request) {
       }))
     )
 
-    if (questionsError) throw new Error('Failed to insert questions')
+    if (questionsError) {
+      // Delete orphaned session row to prevent partial writes
+      await supabase.from('sessions').delete().eq('id', session.id)
+      throw new Error('Failed to insert questions')
+    }
 
     return NextResponse.json({ sessionId: session.id })
   } catch (error) {

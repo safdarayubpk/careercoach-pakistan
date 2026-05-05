@@ -1,21 +1,21 @@
 'use client'
 
-type Level = 'Junior' | 'Mid' | 'Senior'
+import type { Level } from '@/types/session'
+import { VALID_LEVELS } from '@/types/session'
 
 interface LevelSelectorProps {
   value: Level | null
   onChange: (level: Level) => void
 }
 
-const LEVELS: Level[] = ['Junior', 'Mid', 'Senior']
-
 export default function LevelSelector({ value, onChange }: LevelSelectorProps) {
   return (
     <div className="flex gap-2">
-      {LEVELS.map(level => (
+      {VALID_LEVELS.map(level => (
         <button
           key={level}
           type="button"
+          aria-pressed={value === level}
           onClick={() => onChange(level)}
           className={`rounded-md px-4 py-2 text-sm font-medium transition-colors ${
             value === level
