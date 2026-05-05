@@ -57,8 +57,10 @@ create policy "Users can read own session questions"
   on questions for select using (
     exists (select 1 from sessions where sessions.id = questions.session_id and sessions.user_id = auth.uid())
   );
-create policy "Service role can insert questions"
-  on questions for insert with check (true);
+create policy "Users can insert questions into own sessions"
+  on questions for insert with check (
+    exists (select 1 from sessions where sessions.id = session_id and sessions.user_id = auth.uid())
+  );
 
 -- Answers
 create table answers (
@@ -194,11 +196,12 @@ User:   Role: {role}
 ```
 
 **Steps:**
-1. Fetch question + session from DB — verify session belongs to current user
-2. Call Groq with answer evaluation prompt
-3. Parse JSON response
-4. Insert row into `answers` table (score may be null if Groq fails — see error handling)
-5. Return feedback JSON to client
+1. Validate `answerText.trim().length >= 10` — return 400 if too short
+2. Fetch question + session from DB using user's session cookie — verify session belongs to current user, return 403 if not
+3. Call Groq with answer evaluation prompt
+4. Parse JSON response
+5. Insert row into `answers` table (score may be null if Groq fails — see error handling)
+6. Return feedback JSON to client
 
 **Groq answer evaluation prompt:**
 ```
@@ -230,7 +233,7 @@ Feedback is shown client-side immediately after `POST /api/feedback` returns —
 - **Missing card:** Red background, `✗ WHAT WAS MISSING`, bullet list from `missing_points[]`
 - **Improve card:** Blue background, `💡 IMPROVE`, single `improve_tip` text
 - **Model answer toggle:** Collapsed by default. Click to expand inline. Shows `model_answer` text.
-- **Next button:** "Next Question →" (or "See Results →" on question 10) → navigates to next question or report stub
+- **Next button:** "Next Question →" (or "See Results →" on question 10) → calls `router.push(pathname)` + `router.refresh()` to force Server Component re-fetch, which increments the question by deriving from updated answer count
 
 ### Score Labels
 | Score | Label |
@@ -272,19 +275,33 @@ pnpm add groq-sdk
 
 Required before any API route can call Groq.
 
+### Groq Client Module
+
+Create `src/lib/groq.ts`:
+```typescript
+import Groq from 'groq-sdk'
+
+export const groq = new Groq({ apiKey: process.env.GROQ_API_KEY })
+```
+
+Import `groq` from this module in all API routes. Never instantiate `new Groq()` inline.
+
 ---
 
 ## Components
 
 ```
 src/components/session/
-  role-autocomplete.tsx     ← 'use client' — searchable input with predefined list
-  level-selector.tsx        ← 'use client' — pill toggle (Junior/Mid/Senior)
+  role-autocomplete.tsx       ← 'use client' — searchable input with predefined list
+  level-selector.tsx          ← 'use client' — pill toggle (Junior/Mid/Senior)
   interview-type-selector.tsx ← 'use client' — pill toggle (Technical/Behavioral/Mixed)
-  question-card.tsx         ← Server Component — blue border card + tip box
-  answer-form.tsx           ← 'use client' — textarea + submit + voice button
-  feedback-view.tsx         ← 'use client' — score + cards + model answer toggle
+  session-player.tsx          ← 'use client' — owns question/feedback state toggle
+    question-card.tsx         ←   plain component — blue border card + tip box
+    answer-form.tsx           ←   'use client' — textarea + submit + voice button
+    feedback-view.tsx         ←   'use client' — score + cards + model answer toggle
 ```
+
+`session-player.tsx` is the Client Component boundary. It receives the current question as a prop from the Server Component page, manages `mode: 'question' | 'feedback'` state, and renders either `<QuestionCard>` + `<AnswerForm>` or `<FeedbackView>` based on state.
 
 ---
 
