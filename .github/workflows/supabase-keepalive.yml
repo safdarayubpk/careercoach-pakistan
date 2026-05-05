@@ -14,20 +14,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Ping Supabase REST API
+      - name: Ping Supabase Health Endpoint
         run: |
           STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
             -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
-            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
-            "${{ secrets.SUPABASE_URL }}/rest/v1/users?select=id&limit=1")
+            "${{ secrets.SUPABASE_URL }}/auth/v1/health")
 
           echo "Supabase ping status: $STATUS"
 
           if [ "$STATUS" -ge 200 ] && [ "$STATUS" -lt 300 ]; then
             echo "✓ Supabase is active and responding."
-          elif [ "$STATUS" = "406" ]; then
-            echo "✓ Supabase is active (406 = table exists, RLS blocked anon read — expected)."
           else
-            echo "✗ Unexpected status $STATUS — check secrets and Supabase project."
+            echo "✗ Unexpected status $STATUS — check SUPABASE_URL and SUPABASE_ANON_KEY secrets."
             exit 1
           fi
