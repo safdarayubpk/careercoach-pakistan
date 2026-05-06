@@ -10,7 +10,7 @@ This file provides guidance to Claude Code when working in the `careercoach-paki
 Pakistani professionals pay PKR 999/month instead of PKR 7,000/month for global tools (Final Round AI, Huru.ai).
 Core differentiator: JD-paste → tailored questions + Urdu language support.
 
-**Status:** Phase 1 in progress. Auth UI designed. Implementation next.
+**Status:** Phases 0–5 complete. Phase 6 (Landing page) next.
 **Repo:** github.com/safdarayubpk/careercoach-pakistan
 **Deploy:** Vercel (full-stack, not static)
 
@@ -65,22 +65,25 @@ app/
   (marketing)/
     page.tsx              ← Landing page (public)
     layout.tsx
-  (app)/
-    dashboard/page.tsx    ← Progress dashboard (protected)
+  app/                    ← Protected app (literal directory, not a route group)
+    dashboard/page.tsx    ← Progress dashboard
     session/
       setup/page.tsx      ← Session setup: role, level, JD paste
       [id]/
-        question/page.tsx ← Question screen
-        feedback/page.tsx ← Feedback screen
-        report/page.tsx   ← Session report
-    billing/page.tsx      ← Subscription management
-    layout.tsx            ← Auth guard middleware
+        question/page.tsx ← Question + answer + feedback (all-in-one session player)
+        report/page.tsx   ← Session report with Q&A accordion
+    billing/page.tsx      ← Subscription management (paywall or active state)
+    billing/success/page.tsx ← Post-payment confirmation
+    layout.tsx            ← App shell with nav
   auth/
-    callback/route.ts     ← Supabase OAuth callback
+    callback/route.ts     ← Supabase OAuth callback (creates public.users row)
   api/
-    session/route.ts      ← Create session, generate questions
+    session/route.ts      ← Create session, generate questions via Groq
     feedback/route.ts     ← Submit answer → Groq → return score + feedback
-    webhooks/stripe/route.ts ← Stripe subscription events
+    checkout/route.ts     ← Create Stripe Checkout Session
+    portal/route.ts       ← Create Stripe Customer Portal session
+    webhooks/stripe/route.ts ← Stripe webhook events (subscription lifecycle)
+middleware.ts             ← Protects /app/* — checks trial + subscription
 ```
 
 ### Data Flow
@@ -97,11 +100,11 @@ User pastes JD + selects role/level
 ### Database Schema (Supabase)
 
 ```sql
-users           -- id, email, created_at, is_subscribed, trial_ends_at
+users           -- id, email, full_name, avatar_url, created_at, is_subscribed, trial_ends_at
 sessions        -- id, user_id, role, level, interview_type, jd_text, score, created_at
 questions       -- id, session_id, text, category, order_index
 answers         -- id, question_id, user_id, answer_text, score, feedback_json
-subscriptions   -- id, user_id, stripe_customer_id, stripe_subscription_id, status
+subscriptions   -- id, user_id, stripe_customer_id, stripe_subscription_id, status, created_at, updated_at
 ```
 
 ### Auth Flow
@@ -160,16 +163,20 @@ Response must always be valid JSON — use `response_format: { type: "json_objec
 
 ## Spec Documents
 
-All features are spec'd before coding. Specs live in `docs/specs/`:
+All features are spec'd before coding. Specs live in `docs/superpowers/specs/`, plans in `docs/superpowers/plans/`:
 
 ```
-docs/specs/
-  01-auth.md              ← Google login + Supabase session ✓ READY
-  02-interview-session.md ← Setup → Question → Answer → Feedback flow
-  03-ai-feedback.md       ← Groq integration + scoring logic
-  04-reports.md           ← Session report + progress dashboard
-  05-subscription.md      ← Stripe paywall + trial logic
-  06-landing-page.md      ← Marketing landing page
+docs/superpowers/specs/
+  2026-05-05-auth-ui-design.md                    ← Phase 1: Auth UI ✓ DONE
+  2026-05-05-interview-session-ai-feedback.md     ← Phases 2+3: Session + Groq feedback ✓ DONE
+  2026-05-06-session-report-dashboard.md          ← Phase 4: Report + dashboard ✓ DONE
+  2026-05-06-subscription-paywall.md              ← Phase 5: Stripe paywall ✓ DONE
+
+docs/superpowers/plans/
+  2026-05-05-interview-session-ai-feedback.md
+  2026-05-05-phase-1-auth-ui.md
+  2026-05-06-session-report-dashboard.md
+  2026-05-06-subscription-paywall.md
 ```
 
 Always read the relevant spec before implementing a feature.
@@ -178,12 +185,12 @@ Always read the relevant spec before implementing a feature.
 
 ```
 Phase 0: Project setup (Next.js + Supabase + Groq + Stripe configured) ✓ DONE
-Phase 1: Auth (Google login, protected routes, user table) ← IN PROGRESS
-Phase 2: Interview session (setup form, question screen, answer input)
-Phase 3: AI feedback (Groq integration, scoring, feedback display)
-Phase 4: Session report + progress dashboard
-Phase 5: Subscription paywall (Stripe, trial logic, billing page)
-Phase 6: Landing page (marketing, pricing, CTA)
+Phase 1: Auth (Google login, protected routes, user table) ✓ DONE
+Phase 2: Interview session (setup form, question screen, answer input) ✓ DONE
+Phase 3: AI feedback (Groq integration, scoring, feedback display) ✓ DONE
+Phase 4: Session report + progress dashboard ✓ DONE
+Phase 5: Subscription paywall (Stripe, trial logic, billing page) ✓ DONE
+Phase 6: Landing page (marketing, pricing, CTA) ← NEXT
 Phase 7: Polish (animations, mobile, accessibility, Urdu RTL)
 Phase 8: Launch prep (domain, env vars, Vercel deploy, smoke test)
 ```
@@ -198,6 +205,10 @@ Phase 8: Launch prep (domain, env vars, Vercel deploy, smoke test)
 - All `/app/*` routes require active session — middleware enforces this
 - RLS (Row Level Security) enabled on all Supabase tables
 - Trial expiry checked server-side in middleware — never trust client
+- `supabaseAdmin` (service role) used only in server API routes — guarded with `import 'server-only'`
+- Auth callback (`/auth/callback`) uses `supabaseAdmin` to upsert `public.users` — anon client is blocked by RLS
+- Score utilities in `src/lib/scores.ts` — `computeAverage`, `scoreLabel`, `scoreColor`
+- Session types in `src/types/session.ts`
 
 ## Skills Installed
 
