@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { scoreLabel, scoreColor } from '@/lib/scores'
+import { scoreColor } from '@/lib/scores'
 
 interface FeedbackJson {
   score: number
@@ -57,6 +57,7 @@ export default function ReportAccordion({ items }: Props) {
             {/* Collapsed header — always visible */}
             <button
               onClick={() => toggle(index)}
+              aria-expanded={isExpanded}
               className="flex w-full items-center justify-between px-4 py-3 text-left transition-colors hover:bg-gray-50"
             >
               <div className="flex min-w-0 items-center gap-3">
@@ -69,7 +70,7 @@ export default function ReportAccordion({ items }: Props) {
                 <span className={`text-sm font-semibold ${scoreClass}`}>
                   {score !== null ? `${score}/10` : '—'}
                 </span>
-                <span className="text-gray-400 text-xs">{isExpanded ? '▴' : '▾'}</span>
+                <span className="text-gray-400 text-xs" aria-hidden="true">{isExpanded ? '▴' : '▾'}</span>
               </div>
             </button>
 
