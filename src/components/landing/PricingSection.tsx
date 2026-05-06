@@ -83,16 +83,19 @@ export default function PricingSection() {
               })}
         >
           <table className="w-full min-w-[540px] overflow-hidden rounded-2xl bg-white shadow-sm">
+            <caption className="sr-only">
+              Pricing comparison: CareerCoach PK vs competitors
+            </caption>
             <thead>
               <tr className="bg-[#1E40AF] text-white">
-                <th className="px-4 py-4 text-left text-[13px] font-semibold">Feature</th>
-                <th className="px-4 py-4 text-center text-[13px] font-semibold">
+                <th scope="col" className="px-4 py-4 text-left text-[13px] font-semibold">Feature</th>
+                <th scope="col" className="px-4 py-4 text-center text-[13px] font-semibold">
                   CareerCoach PK ⭐
                 </th>
-                <th className="px-4 py-4 text-center text-[13px] font-semibold opacity-70">
+                <th scope="col" className="px-4 py-4 text-center text-[13px] font-semibold opacity-70">
                   Final Round AI
                 </th>
-                <th className="px-4 py-4 text-center text-[13px] font-semibold opacity-70">
+                <th scope="col" className="px-4 py-4 text-center text-[13px] font-semibold opacity-70">
                   Huru.ai
                 </th>
               </tr>
@@ -100,19 +103,19 @@ export default function PricingSection() {
             <tbody>
               {ROWS.map((row) => (
                 <tr key={row.feature} className={row.rowClass ?? ''}>
-                  <td className="border-b border-gray-100 px-4 py-3.5 text-[13px] font-semibold text-gray-700">
+                  <th scope="row" className="border-b border-gray-100 px-4 py-3.5 text-[13px] font-semibold text-gray-700">
                     {row.feature}
-                  </td>
+                  </th>
                   <td
                     className={`border-b border-gray-100 px-4 py-3.5 text-center ${row.usClass ?? 'text-base'}`}
                   >
                     {row.us}
                   </td>
                   <td className="border-b border-gray-100 px-4 py-3.5 text-center text-[13px] text-gray-400">
-                    {row.finalRoundStrike ? <s>{row.finalRound}</s> : row.finalRound}
+                    {row.finalRoundStrike ? <del>{row.finalRound}</del> : row.finalRound}
                   </td>
                   <td className="border-b border-gray-100 px-4 py-3.5 text-center text-[13px] text-gray-400">
-                    {row.huruStrike ? <s>{row.huru}</s> : row.huru}
+                    {row.huruStrike ? <del>{row.huru}</del> : row.huru}
                   </td>
                 </tr>
               ))}
