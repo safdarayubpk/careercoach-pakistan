@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { computeAverage, scoreLabel, scoreColor } from '@/lib/scores'
 
@@ -14,7 +15,9 @@ export default async function DashboardPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  const name: string = user?.user_metadata?.full_name || user?.email || 'there'
+  if (!user) redirect('/')
+
+  const name: string = user.user_metadata?.full_name || user.email || 'there'
 
   // 1. Fetch all sessions newest-first
   const { data: sessions } = await supabase
