@@ -21,24 +21,9 @@ export default function SignInButton({ variant }: SignInButtonProps) {
   if (variant === 'nav') {
     return (
       <button
+        type="button"
         onClick={handleSignIn}
-        onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#f8f8f8')}
-        onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#ffffff')}
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '10px',
-          backgroundColor: '#ffffff',
-          border: '1px solid #dadce0',
-          borderRadius: '4px',
-          padding: '10px 16px',
-          fontFamily: 'Roboto, Arial, sans-serif',
-          fontSize: '14px',
-          fontWeight: 500,
-          color: '#3c4043',
-          cursor: 'pointer',
-          whiteSpace: 'nowrap',
-        }}
+        className="inline-flex cursor-pointer items-center gap-[10px] whitespace-nowrap rounded-[4px] border border-[#dadce0] bg-white px-4 py-2.5 font-[Roboto,Arial,sans-serif] text-sm font-medium text-[#3c4043] hover:bg-[#f8f8f8]"
       >
         <GoogleG />
         Sign in with Google
@@ -49,6 +34,7 @@ export default function SignInButton({ variant }: SignInButtonProps) {
   // variant === 'hero' — large blue marketing CTA
   return (
     <button
+      type="button"
       onClick={handleSignIn}
       className="w-full rounded-[10px] bg-[#1E40AF] px-7 py-3.5 text-[15px] font-bold text-white transition-colors hover:bg-blue-900"
     >
