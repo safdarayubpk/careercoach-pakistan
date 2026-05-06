@@ -110,6 +110,20 @@ Build a `Map<questionId, answer>` in JS, then join questions + answers for rende
 
 **5. `<ReportAccordion>` client component** — receives array of `{ question, answer | null }` items
 
+### FeedbackJson type
+
+The `feedback_json` column stores the Groq response. Type it as:
+```typescript
+interface FeedbackJson {
+  score: number
+  correct_points: string[]
+  missing_points: string[]
+  improve_tip: string
+  model_answer: string
+}
+```
+Cast with `answer.feedback_json as FeedbackJson` after confirming it is non-null.
+
 ### ReportAccordion — `src/components/session/report-accordion.tsx`
 
 `'use client'` — manages `expandedIndex: number | null` state (only one question expanded at a time).
@@ -157,6 +171,11 @@ const { data: sessions } = await supabase
 const sessionList = sessions ?? []
 const sessionIds = sessionList.map(s => s.id)
 
+// Guard: no sessions → skip DB queries, return empty stats immediately
+if (sessionIds.length === 0) {
+  return { sessionsWithScore: [], totalSessions: 0, avgScore: null, bestScore: null }
+}
+
 // 2. Fetch all questions for those sessions in one query
 const { data: allQuestions } = await supabase
   .from('questions')
@@ -196,10 +215,14 @@ const sessionsWithScore = sessionList.map(s => {
 
 ### Stats Calculation
 
-From the `overallScore` values across all sessions:
-- **Total sessions:** `sessions.length`
-- **Avg score:** `computeAverage(sessions.map(s => s.overallScore))`
-- **Best score:** `Math.max(...sessionsWithScore.map(s => s.overallScore).filter((s): s is number => s !== null))` — null if array is empty
+From the `sessionsWithScore` array:
+- **Total sessions:** `sessionsWithScore.length`
+- **Avg score:** `computeAverage(sessionsWithScore.map(s => s.overallScore))`
+- **Best score:**
+  ```typescript
+  const validScores = sessionsWithScore.map(s => s.overallScore).filter((s): s is number => s !== null)
+  const bestScore = validScores.length > 0 ? Math.max(...validScores) : null
+  ```
 
 ### UI Layout — With Sessions
 
