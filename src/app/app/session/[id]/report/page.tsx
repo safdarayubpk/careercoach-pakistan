@@ -105,7 +105,7 @@ export default async function ReportPage({ params }: Props) {
           {overallScore !== null ? scoreLabel(overallScore) : 'Score unavailable'}
         </div>
         <div className="mt-1 text-xs opacity-70">
-          {answeredCount} of 10 questions answered
+          {answeredCount} of {questions.length} questions answered
         </div>
       </div>
 
