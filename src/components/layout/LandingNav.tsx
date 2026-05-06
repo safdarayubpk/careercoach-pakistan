@@ -7,13 +7,13 @@ export default function LandingNav() {
       <div className="hidden items-center gap-6 text-sm md:flex">
         <a
           href="#features"
-          className="text-white/85 transition-colors hover:text-white no-underline"
+          className="text-white/[85%] transition-colors hover:text-white no-underline"
         >
           Features
         </a>
         <a
           href="#pricing"
-          className="text-white/85 transition-colors hover:text-white no-underline"
+          className="text-white/[85%] transition-colors hover:text-white no-underline"
         >
           Pricing
         </a>
