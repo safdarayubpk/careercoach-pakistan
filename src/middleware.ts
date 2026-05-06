@@ -17,15 +17,24 @@ export async function middleware(request: NextRequest) {
       .eq('id', user.id)
       .single()
 
-    if (userRow) {
-      const trialActive = new Date(userRow.trial_ends_at) > new Date()
-      const hasAccess = userRow.is_subscribed || trialActive
+    const isBilling = request.nextUrl.pathname.startsWith('/app/billing')
 
-      // Trial expired and not subscribed → billing
-      // Allow /app/billing itself to prevent redirect loop
-      if (!hasAccess && !request.nextUrl.pathname.startsWith('/app/billing')) {
+    if (!userRow) {
+      // No public.users row — auth callback hasn't run yet or failed.
+      // Redirect to billing to prevent unrestricted access.
+      if (!isBilling) {
         return NextResponse.redirect(new URL('/app/billing', request.url))
       }
+      return supabaseResponse
+    }
+
+    const trialActive = new Date(userRow.trial_ends_at) > new Date()
+    const hasAccess = userRow.is_subscribed || trialActive
+
+    // Trial expired and not subscribed → billing
+    // Allow /app/billing itself to prevent redirect loop
+    if (!hasAccess && !isBilling) {
+      return NextResponse.redirect(new URL('/app/billing', request.url))
     }
 
     // IMPORTANT: return supabaseResponse (with refreshed cookies), not NextResponse.next()

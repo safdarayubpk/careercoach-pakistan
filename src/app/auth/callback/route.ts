@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { supabaseAdmin } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 
 export async function GET(request: Request) {
@@ -24,13 +25,16 @@ export async function GET(request: Request) {
     return NextResponse.redirect(new URL('/', origin))
   }
 
-  // Upsert user row — ignoreDuplicates: true so trial_ends_at is never reset
-  await supabase.from('users').upsert(
+  // Use supabaseAdmin to bypass RLS — anon client cannot insert into public.users.
+  // ignoreDuplicates: true ensures trial_ends_at is never reset on subsequent logins.
+  const trialEndsAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+  await supabaseAdmin.from('users').upsert(
     {
       id: user.id,
       email: user.email!,
       full_name: user.user_metadata?.full_name ?? null,
       avatar_url: user.user_metadata?.avatar_url ?? null,
+      trial_ends_at: trialEndsAt,
     },
     { onConflict: 'id', ignoreDuplicates: true }
   )
