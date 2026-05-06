@@ -23,7 +23,7 @@ export default async function DashboardPage() {
   const { data: sessions } = await supabase
     .from('sessions')
     .select('id, role, level, interview_type, created_at')
-    .eq('user_id', user!.id)
+    .eq('user_id', user.id)
     .order('created_at', { ascending: false })
 
   const sessionList = sessions ?? []
@@ -58,7 +58,7 @@ export default async function DashboardPage() {
     const { data: allAnswers } = await supabase
       .from('answers')
       .select('question_id, score')
-      .eq('user_id', user!.id)
+      .eq('user_id', user.id)
       .in('question_id', allQuestionIds.length > 0 ? allQuestionIds : ['00000000-0000-0000-0000-000000000000'])
 
     const scoreByQuestion = new Map<string, number | null>()
