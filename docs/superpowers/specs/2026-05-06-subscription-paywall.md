@@ -68,7 +68,17 @@ create policy "Users can read own subscription"
   - `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` — not used (Checkout is server-redirect, no embedded form)
   - `NEXT_PUBLIC_STRIPE_PRICE_ID` — the Price ID from Stripe Dashboard (e.g. `price_xxx`)
 - Webhook endpoint registered in Stripe Dashboard: `https://careercoach.pk/api/webhooks/stripe`
-- Events to listen for: `checkout.session.completed`, `customer.subscription.deleted`
+- Events to listen for: `checkout.session.completed`, `customer.subscription.deleted`, `customer.subscription.updated`
+- **Stripe Customer Portal must be activated:** Stripe Dashboard → Billing → Customer Portal → Activate. Without this, `stripe.billingPortal.sessions.create()` throws. Set return URL to `https://careercoach.pk/app/billing`.
+
+---
+
+## Setup
+
+Install Stripe SDK before implementing:
+```bash
+pnpm add stripe
+```
 
 ---
 
@@ -76,10 +86,14 @@ create policy "Users can read own subscription"
 
 ```
 src/lib/stripe.ts                          ← Stripe singleton
+src/lib/supabase/admin.ts                  ← Service-role Supabase client (webhook use only)
 src/app/app/billing/page.tsx               ← Billing page (2 states)
 src/app/app/billing/success/page.tsx       ← Post-payment confirmation
-src/app/api/checkout/route.ts             ← Creates Stripe Checkout Session
-src/app/api/webhooks/stripe/route.ts      ← Handles Stripe events
+src/app/api/checkout/route.ts              ← Creates Stripe Checkout Session
+src/app/api/portal/route.ts               ← Creates Stripe Customer Portal Session
+src/app/api/webhooks/stripe/route.ts       ← Handles Stripe events
+src/components/billing/subscribe-button.tsx ← 'use client' subscribe CTA
+src/components/billing/manage-button.tsx   ← 'use client' manage portal link
 ```
 
 ---
@@ -109,12 +123,12 @@ export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 // 3. Derive base URL: process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
 // 4. Create Stripe Checkout Session:
 //    - mode: 'subscription'
-//    - line_items: [{ price: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID, quantity: 1 }]
+//    - line_items: [{ price: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID!, quantity: 1 }]
 //    - success_url: baseUrl + '/app/billing/success?session_id={CHECKOUT_SESSION_ID}'
 //    - cancel_url: baseUrl + '/app/billing'
 //    - client_reference_id: user.id   ← links Stripe session to Supabase user
 //    - customer_email: user.email     ← pre-fills email in Stripe checkout
-// 4. Return { url: session.url }
+// 5. Return NextResponse.json({ url: session.url })
 ```
 
 Client calls this route, gets back `{ url }`, and does `window.location.href = url` to redirect.
@@ -136,18 +150,28 @@ Client calls this route, gets back `{ url }`, and does `window.location.href = u
 // 4. Handle events:
 
 // Event: checkout.session.completed
-//   - Extract client_reference_id (= user_id) and subscription data
-//   - Retrieve subscription from Stripe: stripe.subscriptions.retrieve(session.subscription)
-//   - Upsert subscriptions table: { user_id, stripe_customer_id, stripe_subscription_id, status: 'active' }
+//   - Extract client_reference_id (= user_id), session.customer, session.subscription
+//   - Upsert subscriptions table:
+//       { user_id, stripe_customer_id: session.customer, stripe_subscription_id: session.subscription, status: 'active' }
+//       onConflict: 'stripe_subscription_id' (idempotent — webhook may fire twice)
 //   - Update users table: { is_subscribed: true } where id = user_id
 //   - Use supabaseAdmin (service role key) — not the anon client
 
 // Event: customer.subscription.deleted
-//   - Find subscriptions row by stripe_subscription_id
+//   - stripe_subscription_id = event.data.object.id
+//   - Find subscriptions row by stripe_subscription_id → get user_id
 //   - Update subscriptions: { status: 'canceled' }
-//   - Update users: { is_subscribed: false } where id = subscription.user_id
+//   - Update users: { is_subscribed: false } where id = user_id
 
-// 5. Return 200 for all handled events, 200 for unhandled (never return 4xx for unknown events)
+// Event: customer.subscription.updated
+//   - stripe_subscription_id = event.data.object.id
+//   - sub_status = event.data.object.status  (e.g. 'active', 'past_due', 'unpaid', 'canceled')
+//   - is_subscribed = sub_status === 'active'
+//   - Update subscriptions: { status: sub_status }
+//   - Update users: { is_subscribed } where user_id found via stripe_subscription_id
+//   - Covers payment failure → past_due → user loses access without needing manual cancellation
+
+// 5. Return NextResponse.json({ received: true }) for all events (never 4xx for unknown events)
 ```
 
 **Important:** Use `SUPABASE_SERVICE_ROLE_KEY` (admin client) in the webhook — it runs without a user session. Never use the anon client here.
@@ -158,7 +182,15 @@ The webhook route must export `export const dynamic = 'force-dynamic'` and disab
 
 ## `src/app/app/billing/page.tsx`
 
-Server Component. Fetches user's `is_subscribed` status from Supabase.
+Server Component. Fetches `is_subscribed` and `trial_ends_at` from the `users` table:
+
+```typescript
+const { data: userRow } = await supabase
+  .from('users')
+  .select('is_subscribed, trial_ends_at')
+  .eq('id', user.id)
+  .single()
+```
 
 ### State 1 — Unsubscribed (trial expired or active)
 
@@ -205,12 +237,13 @@ const daysLeft = Math.ceil(
 // Logic:
 // 1. Get user from supabase.auth.getUser() — 401 if not found
 // 2. Find stripe_customer_id from subscriptions table where user_id = user.id
+//    → if not found → 400 'No active subscription'
 // 3. Derive base URL: process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
 // 4. stripe.billingPortal.sessions.create({
 //      customer: stripe_customer_id,
 //      return_url: baseUrl + '/app/billing',
 //    })
-// 4. Return { url: session.url }
+// 5. Return NextResponse.json({ url: session.url })
 ```
 
 ---
@@ -265,22 +298,11 @@ This client bypasses RLS — only use in server-side API routes, never in compon
 
 ## File Map
 
-**New files:**
-```
-src/lib/stripe.ts
-src/lib/supabase/admin.ts
-src/app/app/billing/page.tsx
-src/app/app/billing/success/page.tsx
-src/app/api/checkout/route.ts
-src/app/api/portal/route.ts
-src/app/api/webhooks/stripe/route.ts
-src/components/billing/subscribe-button.tsx
-src/components/billing/manage-button.tsx
-```
+**New files:** (see New Files section above)
 
 **Modified files:**
 ```
-(none — middleware already handles /app/billing bypass correctly)
+(none — middleware startsWith('/app/billing') already covers /app/billing/success)
 ```
 
 ---
@@ -289,8 +311,10 @@ src/components/billing/manage-button.tsx
 
 | Scenario | Behaviour |
 |----------|-----------|
-| Checkout API fails | Return 500, show "Something went wrong. Try again." on billing page |
+| Checkout API fails | Return 500, `SubscribeButton` shows "Something went wrong. Try again." |
 | Webhook signature invalid | Return 400, log error |
-| Webhook: user not found | Return 200 (idempotent), log warning |
-| Portal: no subscription found | Return 400 "No active subscription" |
-| User visits /app/billing/success without paying | Shows confirmation anyway — harmless, they have no subscription so middleware will redirect on next protected visit |
+| Webhook: user not found (client_reference_id missing) | Return 200 (idempotent), log warning — don't crash Stripe retry loop |
+| Webhook: `customer.subscription.updated` to `past_due` | `is_subscribed = false` — middleware redirects to `/app/billing` on next request |
+| Portal: no subscription row found | Return 400 "No active subscription" |
+| User visits /app/billing/success without paying | Shows confirmation — harmless, middleware redirects on next protected route visit |
+| Stripe Customer Portal not activated in Dashboard | `stripe.billingPortal.sessions.create()` throws — `ManageButton` shows error |
