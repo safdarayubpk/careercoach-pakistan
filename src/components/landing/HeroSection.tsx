@@ -23,14 +23,14 @@ export default function HeroSection() {
       }
 
   return (
-    <section className="bg-[#f8fafc] px-6 py-16 md:py-24">
+    <section aria-labelledby="hero-heading" className="bg-[#f8fafc] px-6 py-16 md:py-24">
       <div className="mx-auto grid max-w-5xl grid-cols-1 items-center gap-12 md:grid-cols-2">
         {/* Left column — pitch */}
         <motion.div {...fadeUp}>
           <div className="mb-4 inline-block rounded-full bg-[#dbeafe] px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-[#1E40AF]">
             Built for Pakistan 🇵🇰
           </div>
-          <h1 className="mb-4 text-4xl font-extrabold leading-tight text-gray-900">
+          <h1 id="hero-heading" className="mb-4 text-4xl font-extrabold leading-tight text-gray-900">
             Ace Your Next Interview
             <br />
             <span className="text-[#1E40AF]">for PKR 999/month</span>
@@ -48,7 +48,7 @@ export default function HeroSection() {
         </motion.div>
 
         {/* Right column — product preview card */}
-        <motion.div {...fadeUpDelayed} className="rounded-2xl bg-[#1E40AF] p-6 text-white">
+        <motion.div {...fadeUpDelayed} aria-hidden="true" className="rounded-2xl bg-[#1E40AF] p-6 text-white">
           <p className="mb-3 text-[11px] font-semibold uppercase tracking-wide text-white/60">
             Live Preview
           </p>
