@@ -22,25 +22,42 @@ export default function SignInButton({ variant }: SignInButtonProps) {
     return (
       <button
         onClick={handleSignIn}
-        className="rounded-md bg-white px-3 py-1.5 text-sm font-semibold text-[#1E40AF] hover:bg-blue-50 transition-colors"
+        onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#f8f8f8')}
+        onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#ffffff')}
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '10px',
+          backgroundColor: '#ffffff',
+          border: '1px solid #dadce0',
+          borderRadius: '4px',
+          padding: '10px 16px',
+          fontFamily: 'Roboto, Arial, sans-serif',
+          fontSize: '14px',
+          fontWeight: 500,
+          color: '#3c4043',
+          cursor: 'pointer',
+          whiteSpace: 'nowrap',
+        }}
       >
-        Sign In
+        <GoogleG />
+        Sign in with Google
       </button>
     )
   }
 
+  // variant === 'hero' — large blue marketing CTA
   return (
     <button
       onClick={handleSignIn}
-      className="inline-flex items-center gap-3 rounded-md bg-white px-5 py-3 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 transition-colors"
+      className="w-full rounded-[10px] bg-[#1E40AF] px-7 py-3.5 text-[15px] font-bold text-white transition-colors hover:bg-blue-900"
     >
-      <GoogleLogo />
-      Start Free Trial
+      Start Free Trial — 7 Days Free
     </button>
   )
 }
 
-function GoogleLogo() {
+function GoogleG() {
   return (
     <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
       <path
