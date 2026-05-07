@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import SignOutButton from '@/components/auth/sign-out-button'
 import Link from 'next/link'
+import MobileDrawer from '@/components/layout/MobileDrawer'
 
 export default async function AppNav() {
   const supabase = await createClient()
@@ -12,7 +13,6 @@ export default async function AppNav() {
   const email: string = user?.email ?? ''
   const avatarUrl: string | null = user?.user_metadata?.avatar_url ?? null
 
-  // Initials: first letter of full name, else first two chars of email
   const initials = fullName
     ? fullName[0].toUpperCase()
     : email.slice(0, 2).toUpperCase()
@@ -20,9 +20,14 @@ export default async function AppNav() {
   const displayName = fullName || email
 
   return (
-    <nav className="bg-[#1E40AF] text-white px-6 py-3 flex items-center justify-between">
+    <nav
+      aria-label="App navigation"
+      className="bg-[#1E40AF] text-white px-6 py-3 flex items-center justify-between"
+    >
       <span className="font-bold text-lg">CareerCoach PK</span>
-      <div className="flex items-center gap-6 text-sm">
+
+      {/* Desktop nav links — hidden on mobile */}
+      <div className="hidden md:flex items-center gap-6 text-sm">
         <Link href="/app/dashboard" className="hover:text-white/80 transition-colors">
           Dashboard
         </Link>
@@ -33,7 +38,9 @@ export default async function AppNav() {
           Billing
         </Link>
       </div>
-      <div className="flex items-center gap-3">
+
+      {/* Desktop user section — hidden on mobile */}
+      <div className="hidden md:flex items-center gap-3">
         {avatarUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -50,6 +57,14 @@ export default async function AppNav() {
         <span className="text-white/30 select-none">|</span>
         <SignOutButton />
       </div>
+
+      {/* Mobile hamburger — MobileDrawer renders the ☰ button and the drawer */}
+      <MobileDrawer
+        displayName={displayName}
+        email={email}
+        initials={initials}
+        avatarUrl={avatarUrl}
+      />
     </nav>
   )
 }
