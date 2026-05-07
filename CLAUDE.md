@@ -10,7 +10,7 @@ This file provides guidance to Claude Code when working in the `careercoach-paki
 Pakistani professionals pay PKR 999/month instead of PKR 7,000/month for global tools (Final Round AI, Huru.ai).
 Core differentiator: JD-paste → tailored questions + Urdu language support.
 
-**Status:** Phases 0–6 complete. Phase 7 (Polish) next.
+**Status:** Phases 0–7 complete. Phase 8 (Launch prep) next.
 **Repo:** github.com/safdarayubpk/careercoach-pakistan
 **Deploy:** Vercel (full-stack, not static)
 
@@ -145,7 +145,12 @@ Response must always be valid JSON — use `response_format: { type: "json_objec
 - Landing page: Split hero — left pitch + CTA, right live product preview mockup
 - Landing nav: Logo + Features/Pricing anchor links + Google-branded "Sign in with Google" button (white bg, colored G, Roboto font). Sticky top-0. Nav links hidden on mobile.
 - Landing page sections: HeroSection → FeaturesSection → PricingSection → FooterSection (each its own component in `src/components/landing/`)
-- App shell: Blue top nav bar (#1E40AF) — logo left, nav links center (Dashboard | Sessions | Billing), avatar + name + | + Sign out right
+- App shell: Blue top nav bar (#1E40AF) — logo left, nav links center (Dashboard | Sessions | Billing), avatar + name + | + Sign out right. On mobile (`< md`): logo left, ☰ hamburger right → slide-in MobileDrawer from right
+- Mobile nav drawer: `src/components/layout/MobileDrawer.tsx` (Client Component) — user info header (blue), nav links with 48px touch targets, Sign out footer. AppNav stays Server Component.
+- Page transitions: `src/components/layout/page-transition.tsx` (Client Component) — AnimatePresence wraps children in app layout, fade+drift 0.25s entry / 0.15s exit, `useReducedMotion()` aware
+- Feedback reveal: score counter animates 0→actual (0.6s), correct/missing cards stagger in, improve tip fades in last — all in `src/components/session/feedback-view.tsx`
+- Skip-to-content link: first element in app layout, jumps to `id="main-content"` on the `<main>` element
+- Focus rings: `:focus-visible { outline: 2px solid #1E40AF; outline-offset: 2px }` in `src/app/globals.css`
 - Question screen: blue left-border card for question text, orange tip box, green JD context pill
 - Feedback screen: green card (correct), red card (missing), blue card (improve tip)
 - Score display: gradient blue card with large number `/10`
@@ -173,6 +178,8 @@ docs/superpowers/specs/
   2026-05-06-session-report-dashboard.md          ← Phase 4: Report + dashboard ✓ DONE
   2026-05-06-subscription-paywall.md              ← Phase 5: Stripe paywall ✓ DONE
   2026-05-06-landing-page.md                      ← Phase 6: Landing page ✓ DONE
+  2026-05-07-mobile-accessibility.md              ← Phase 7a: Mobile + WCAG 2.1 AA ✓ DONE
+  2026-05-07-animations.md                        ← Phase 7b: App animations ✓ DONE
 
 docs/superpowers/plans/
   2026-05-05-interview-session-ai-feedback.md
@@ -180,6 +187,8 @@ docs/superpowers/plans/
   2026-05-06-session-report-dashboard.md
   2026-05-06-subscription-paywall.md
   2026-05-06-landing-page.md
+  2026-05-07-mobile-accessibility.md
+  2026-05-07-animations.md
 ```
 
 Always read the relevant spec before implementing a feature.
@@ -194,14 +203,18 @@ Phase 3: AI feedback (Groq integration, scoring, feedback display) ✓ DONE
 Phase 4: Session report + progress dashboard ✓ DONE
 Phase 5: Subscription paywall (Stripe, trial logic, billing page) ✓ DONE
 Phase 6: Landing page (marketing, pricing, CTA) ✓ DONE
-Phase 7: Polish (animations, mobile, accessibility, Urdu RTL) ← NEXT
-Phase 8: Launch prep (domain, env vars, Vercel deploy, smoke test)
+Phase 7: Polish (animations, mobile, accessibility) ✓ DONE
+Phase 8: Launch prep (domain, env vars, Vercel deploy, smoke test) ← NEXT
+Phase 9: Urdu RTL layout (deferred from Phase 7)
 ```
 
 ## Key Conventions
 
-- All animations respect `prefers-reduced-motion: reduce`
+- All animations respect `prefers-reduced-motion: reduce` via `useReducedMotion()` from Framer Motion
+- Page transitions: `initial={prefersReducedMotion ? false : {...}}`, `exit={prefersReducedMotion ? {} : {...}}`
 - Framer Motion scroll animations: `whileInView` with `once: true`
+- Touch targets: all interactive elements on mobile must be `min-h-[44px]`
+- WCAG 2.1 AA: `:focus-visible` ring globally, skip-to-content link, `aria-label` on icon buttons, `min-h-[44px]` on touch targets
 - ShadCN components in `src/components/ui/` — do not manually edit
 - Groq responses always parsed as JSON — never trust plain text from LLM
 - Stripe webhooks must verify signature before processing
