@@ -5,7 +5,11 @@ export const alt = 'CareerCoach Pakistan — AI Interview Prep'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
-export default function OgImage() {
+export default async function OgImage() {
+  const interBold = await fetch(
+    new URL('https://fonts.gstatic.com/s/inter/v13/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuFuYAZ9hiJ-Ek-_EeA.woff2')
+  ).then((res) => res.arrayBuffer())
+
   return new ImageResponse(
     (
       <div
@@ -27,6 +31,7 @@ export default function OgImage() {
             fontWeight: 700,
             marginBottom: 24,
             textAlign: 'center',
+            fontFamily: 'Inter',
           }}
         >
           CareerCoach Pakistan
@@ -37,6 +42,7 @@ export default function OgImage() {
             fontSize: 32,
             textAlign: 'center',
             marginBottom: 40,
+            fontFamily: 'Inter',
           }}
         >
           AI Interview Prep — Tailored to Pakistani Job Seekers
@@ -49,12 +55,23 @@ export default function OgImage() {
             fontWeight: 700,
             padding: '16px 40px',
             borderRadius: 12,
+            fontFamily: 'Inter',
           }}
         >
           PKR 999/month
         </div>
       </div>
     ),
-    { ...size }
+    {
+      ...size,
+      fonts: [
+        {
+          name: 'Inter',
+          data: interBold,
+          style: 'normal',
+          weight: 700,
+        },
+      ],
+    }
   )
 }
