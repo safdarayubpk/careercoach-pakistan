@@ -20,7 +20,6 @@ export default function MobileDrawer({ displayName, email, initials, avatarUrl }
 
   const close = useCallback(() => {
     setIsOpen(false)
-    setTimeout(() => hamburgerRef.current?.focus(), 0)
   }, [])
 
   // Focus trap + Escape key
@@ -30,7 +29,7 @@ export default function MobileDrawer({ displayName, email, initials, avatarUrl }
     if (!el) return
 
     const focusable = el.querySelectorAll<HTMLElement>(
-      'a, button, [tabindex]:not([tabindex="-1"])'
+      'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
     )
     const first = focusable[0]
     const last = focusable[focusable.length - 1]
@@ -74,6 +73,7 @@ export default function MobileDrawer({ displayName, email, initials, avatarUrl }
         className="md:hidden p-2 text-white"
         aria-label="Open navigation menu"
         aria-expanded={isOpen}
+        aria-controls="mobile-drawer"
       >
         <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
           <rect y="3" width="22" height="2.5" rx="1.25" fill="currentColor" />
@@ -82,7 +82,7 @@ export default function MobileDrawer({ displayName, email, initials, avatarUrl }
         </svg>
       </button>
 
-      <AnimatePresence>
+      <AnimatePresence onExitComplete={() => hamburgerRef.current?.focus()}>
         {isOpen && (
           <>
             {/* Backdrop */}
@@ -98,6 +98,7 @@ export default function MobileDrawer({ displayName, email, initials, avatarUrl }
 
             {/* Drawer */}
             <motion.div
+              id="mobile-drawer"
               ref={drawerRef}
               role="dialog"
               aria-modal="true"
@@ -106,7 +107,7 @@ export default function MobileDrawer({ displayName, email, initials, avatarUrl }
               initial={{ x: prefersReducedMotion ? 0 : 260 }}
               animate={{ x: 0 }}
               exit={{ x: prefersReducedMotion ? 0 : 260 }}
-              transition={{ duration: 0.25, ease: 'easeOut' }}
+              transition={{ duration: prefersReducedMotion ? 0 : 0.25, ease: 'easeOut' }}
             >
               {/* Close button */}
               <div className="flex justify-end p-3">
