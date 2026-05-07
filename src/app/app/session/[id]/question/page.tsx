@@ -57,7 +57,7 @@ export default async function QuestionPage({ params }: Props) {
   const progressPercent = Math.round(((answeredCount + 1) / 10) * 100)
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-2xl mx-auto px-4 sm:px-0">
       {/* Progress bar */}
       <div className="mb-6">
         <div className="mb-2 flex items-center justify-between text-sm text-gray-600">

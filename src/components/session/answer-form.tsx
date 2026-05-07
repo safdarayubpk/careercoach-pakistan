@@ -76,7 +76,7 @@ export default function AnswerForm({ onSubmit, loading }: Props) {
         rows={5}
         placeholder="Type your answer here (English or Urdu)…"
         disabled={loading}
-        className="w-full resize-none rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-[#1E40AF] focus:outline-none focus:ring-1 focus:ring-[#1E40AF]"
+        className="w-full min-h-[120px] resize-none rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-[#1E40AF] focus:outline-none focus:ring-1 focus:ring-[#1E40AF]"
       />
       {/* Live interim transcription preview */}
       {interimText && (
@@ -90,7 +90,7 @@ export default function AnswerForm({ onSubmit, loading }: Props) {
           type="button"
           onClick={() => onSubmit(answer)}
           disabled={!isValid || loading}
-          className="flex-1 rounded-md bg-[#1E40AF] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
+          className="w-full flex-1 rounded-md bg-[#1E40AF] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {loading ? 'Evaluating…' : 'Submit Answer'}
         </button>
@@ -99,7 +99,7 @@ export default function AnswerForm({ onSubmit, loading }: Props) {
             type="button"
             onClick={handleVoice}
             disabled={loading}
-            className={`rounded-md border px-4 py-2.5 text-sm font-medium transition-colors ${
+            className={`min-h-[44px] min-w-[44px] rounded-md border px-4 py-2.5 text-sm font-medium transition-colors ${
               listening
                 ? 'border-red-300 bg-red-50 text-red-600'
                 : 'border-gray-300 bg-white text-gray-700 hover:border-[#1E40AF]'
