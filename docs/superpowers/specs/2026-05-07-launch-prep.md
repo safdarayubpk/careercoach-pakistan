@@ -148,7 +148,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
 ---
 
-### 5. Environment Variable Reference (`.env.example`)
+### 5. Fix Duplicate Env Var (`.env.local`)
+
+`.env.local` currently defines `NEXT_PUBLIC_SITE_URL` twice (both `http://localhost:3000`). Remove the duplicate. The file should have it once.
+
+---
+
+### 6. Environment Variable Reference (`.env.example`)
 
 Committed to the repo. Documents all required vars. `.env.local` stays gitignored.
 
@@ -192,8 +198,9 @@ Verify at: `github.com/safdarayubpk/careercoach-pakistan`
 
 ### Step 2: Create Vercel project
 
-1. Go to [vercel.com](https://vercel.com) → New Project
-2. Import from GitHub → select `careercoach-pakistan`
+1. If you don't have a Vercel account, create a free one at [vercel.com](https://vercel.com)
+2. Go to vercel.com → New Project
+3. Import from GitHub → select `careercoach-pakistan`
 3. Framework: **Next.js** (auto-detected)
 4. Root directory: leave as default (`.`)
 5. Do NOT deploy yet — add env vars first (Step 3)
@@ -230,7 +237,22 @@ After the first deploy, go back to Vercel → Settings → Environment Variables
 
 ---
 
-### Step 5: Configure Supabase
+### Step 5: Configure Google Cloud Console OAuth
+
+Google blocks OAuth flows from origins not in its allowlist. You need to add your Vercel URL.
+
+1. Go to [console.cloud.google.com](https://console.cloud.google.com) → APIs & Services → Credentials
+2. Click your OAuth 2.0 Client ID (the one used for Supabase Google Auth)
+3. Under **Authorized JavaScript origins** → Add URI: `https://<your-vercel-url>`
+4. Save
+
+You do NOT need to change **Authorized redirect URIs** — those point to `https://<supabase-project-ref>.supabase.co/auth/v1/callback` which doesn't change.
+
+Without this step, clicking "Sign in with Google" on the production URL will show a Google error: "Error 400: redirect_uri_mismatch".
+
+---
+
+### Step 6: Configure Supabase
 
 In the [Supabase dashboard](https://supabase.com/dashboard) → your project → Authentication → URL Configuration:
 
@@ -241,7 +263,7 @@ Without this, Google OAuth will redirect back to `localhost:3000` instead of you
 
 ---
 
-### Step 6: Configure Stripe webhook
+### Step 7: Configure Stripe webhook
 
 In the [Stripe dashboard](https://dashboard.stripe.com) → Developers → Webhooks:
 
@@ -255,7 +277,7 @@ In the [Stripe dashboard](https://dashboard.stripe.com) → Developers → Webho
 
 ---
 
-### Step 7: Smoke test
+### Step 8: Smoke test
 
 Open your Vercel URL in an incognito browser window. Run through this checklist:
 
@@ -287,6 +309,7 @@ Open your Vercel URL in an incognito browser window. Run through this checklist:
 | `src/app/opengraph-image.tsx` | Create — dynamic OG image via ImageResponse |
 | `src/app/robots.ts` | Create — robots.txt via Next.js metadata route |
 | `src/app/sitemap.ts` | Create — sitemap.xml via Next.js metadata route |
+| `.env.local` | Modify — remove duplicate `NEXT_PUBLIC_SITE_URL` line |
 | `.env.example` | Create — env var reference for deployment |
 
 ---
