@@ -10,13 +10,13 @@ This file provides guidance to Claude Code when working in the `careercoach-paki
 Pakistani professionals pay PKR 999/month instead of PKR 7,000/month for global tools (Final Round AI, Huru.ai).
 Core differentiator: JD-paste → tailored questions + Urdu language support.
 
-**Status:** Phases 0–5 complete. Phase 6 (Landing page) next.
+**Status:** Phases 0–6 complete. Phase 7 (Polish) next.
 **Repo:** github.com/safdarayubpk/careercoach-pakistan
 **Deploy:** Vercel (full-stack, not static)
 
 ## Tech Stack
 
-- **Framework:** Next.js 16 (App Router) with TypeScript
+- **Framework:** Next.js 16.2.4 (App Router) with TypeScript
 - **Styling:** Tailwind CSS 4 + ShadCN UI
 - **Auth + DB:** Supabase (Google OAuth + PostgreSQL)
 - **AI Engine:** Groq API — LLaMA 3.3 70B (fast inference for feedback)
@@ -143,8 +143,9 @@ Response must always be valid JSON — use `response_format: { type: "json_objec
 
 ### Key UI Patterns
 - Landing page: Split hero — left pitch + CTA, right live product preview mockup
-- Landing nav: Logo + Features/Pricing links + "Sign In" (returning users) + hero "Start Free Trial" CTA (new users)
-- App shell: Blue top nav bar (#1E40AF) — logo left, nav links center, avatar + name right
+- Landing nav: Logo + Features/Pricing anchor links + Google-branded "Sign in with Google" button (white bg, colored G, Roboto font). Sticky top-0. Nav links hidden on mobile.
+- Landing page sections: HeroSection → FeaturesSection → PricingSection → FooterSection (each its own component in `src/components/landing/`)
+- App shell: Blue top nav bar (#1E40AF) — logo left, nav links center (Dashboard | Sessions | Billing), avatar + name + | + Sign out right
 - Question screen: blue left-border card for question text, orange tip box, green JD context pill
 - Feedback screen: green card (correct), red card (missing), blue card (improve tip)
 - Score display: gradient blue card with large number `/10`
@@ -171,12 +172,14 @@ docs/superpowers/specs/
   2026-05-05-interview-session-ai-feedback.md     ← Phases 2+3: Session + Groq feedback ✓ DONE
   2026-05-06-session-report-dashboard.md          ← Phase 4: Report + dashboard ✓ DONE
   2026-05-06-subscription-paywall.md              ← Phase 5: Stripe paywall ✓ DONE
+  2026-05-06-landing-page.md                      ← Phase 6: Landing page ✓ DONE
 
 docs/superpowers/plans/
   2026-05-05-interview-session-ai-feedback.md
   2026-05-05-phase-1-auth-ui.md
   2026-05-06-session-report-dashboard.md
   2026-05-06-subscription-paywall.md
+  2026-05-06-landing-page.md
 ```
 
 Always read the relevant spec before implementing a feature.
@@ -190,8 +193,8 @@ Phase 2: Interview session (setup form, question screen, answer input) ✓ DONE
 Phase 3: AI feedback (Groq integration, scoring, feedback display) ✓ DONE
 Phase 4: Session report + progress dashboard ✓ DONE
 Phase 5: Subscription paywall (Stripe, trial logic, billing page) ✓ DONE
-Phase 6: Landing page (marketing, pricing, CTA) ← NEXT
-Phase 7: Polish (animations, mobile, accessibility, Urdu RTL)
+Phase 6: Landing page (marketing, pricing, CTA) ✓ DONE
+Phase 7: Polish (animations, mobile, accessibility, Urdu RTL) ← NEXT
 Phase 8: Launch prep (domain, env vars, Vercel deploy, smoke test)
 ```
 
