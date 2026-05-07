@@ -82,11 +82,11 @@ export default async function DashboardPage() {
   return (
     <div>
       {/* Header */}
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-2xl font-bold text-gray-900">Welcome back, {name}</h1>
         <Link
           href="/app/session/setup"
-          className="rounded-md bg-[#1E40AF] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-800"
+          className="w-full rounded-md bg-[#1E40AF] px-4 py-2 text-center text-sm font-semibold text-white transition-colors hover:bg-blue-800 sm:w-auto"
         >
           + New Session
         </Link>
@@ -110,7 +110,7 @@ export default async function DashboardPage() {
       ) : (
         <>
           {/* 3 stat cards */}
-          <div className="mb-6 grid grid-cols-3 gap-4">
+          <div className="mb-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="rounded-lg border border-gray-200 bg-white p-4 text-center">
               <p className="text-3xl font-bold text-[#1E40AF]">{totalSessions}</p>
               <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-gray-400">Sessions</p>
@@ -143,7 +143,7 @@ export default async function DashboardPage() {
                 <Link
                   key={session.id}
                   href={`/app/session/${session.id}/report`}
-                  className={`flex items-center justify-between px-5 py-4 transition-colors hover:bg-blue-50 ${
+                  className={`flex min-h-[44px] items-center justify-between px-5 py-4 transition-colors hover:bg-blue-50 ${
                     !isLast ? 'border-b border-gray-100' : ''
                   }`}
                 >
