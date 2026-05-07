@@ -3,7 +3,11 @@
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 
-export default function SignOutButton() {
+interface Props {
+  className?: string
+}
+
+export default function SignOutButton({ className }: Props) {
   const supabase = createClient()
   const router = useRouter()
 
@@ -15,7 +19,7 @@ export default function SignOutButton() {
   return (
     <button
       onClick={handleSignOut}
-      className="text-sm text-white/80 hover:text-white transition-colors"
+      className={className ?? "text-sm text-white/80 hover:text-white transition-colors"}
     >
       Sign out
     </button>
