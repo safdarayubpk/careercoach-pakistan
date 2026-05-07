@@ -102,7 +102,7 @@ export default async function DashboardPage() {
           </p>
           <Link
             href="/app/session/setup"
-            className="inline-block rounded-md bg-[#1E40AF] px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-blue-800"
+            className="inline-flex min-h-[44px] items-center rounded-md bg-[#1E40AF] px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-blue-800"
           >
             Start Your First Interview →
           </Link>
