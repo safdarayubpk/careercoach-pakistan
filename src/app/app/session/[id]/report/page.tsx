@@ -78,9 +78,9 @@ export default async function ReportPage({ params }: Props) {
   }).filter((c): c is { category: Category; score: number | null } => c !== null)
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-2xl mx-auto px-4 sm:px-0">
       {/* Header */}
-      <div className="mb-6 flex items-start justify-between">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Session Report</h1>
           <p className="mt-1 text-sm text-gray-500">
@@ -89,7 +89,7 @@ export default async function ReportPage({ params }: Props) {
         </div>
         <Link
           href="/app/dashboard"
-          className="shrink-0 rounded-md border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+          className="w-full rounded-md border border-gray-200 bg-white px-4 py-2 text-center text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 sm:w-auto sm:shrink-0"
         >
           ← Back to Dashboard
         </Link>

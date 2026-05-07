@@ -58,7 +58,7 @@ export default function ReportAccordion({ items }: Props) {
             <button
               onClick={() => toggle(index)}
               aria-expanded={isExpanded}
-              className="flex w-full items-center justify-between px-4 py-3 text-left transition-colors hover:bg-gray-50"
+              className="flex min-h-[44px] w-full items-center justify-between px-4 py-3 text-left transition-colors hover:bg-gray-50"
             >
               <div className="flex min-w-0 items-center gap-3">
                 <span className="shrink-0 rounded bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-500">
