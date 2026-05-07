@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter, usePathname } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import QuestionCard from './question-card'
 import AnswerForm from './answer-form'
 import FeedbackView from './feedback-view'
@@ -35,7 +35,6 @@ interface Props {
 
 export default function SessionPlayer({ question, session, questionNumber }: Props) {
   const router = useRouter()
-  const pathname = usePathname()
   const [mode, setMode] = useState<'question' | 'feedback'>('question')
   const [feedback, setFeedback] = useState<FeedbackData | null>(null)
   const [feedbackUnavailable, setFeedbackUnavailable] = useState(false)

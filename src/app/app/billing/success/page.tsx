@@ -5,7 +5,7 @@ export default function BillingSuccessPage() {
     <div className="flex min-h-[60vh] items-center justify-center">
       <div className="w-full max-w-sm text-center">
         <div className="mb-4 text-6xl">🎉</div>
-        <h1 className="mb-2 text-2xl font-extrabold text-gray-900">You're in!</h1>
+        <h1 className="mb-2 text-2xl font-extrabold text-gray-900">You&apos;re in!</h1>
         <p className="mb-8 text-sm text-gray-500">
           Payment confirmed. Your CareerCoach Pakistan subscription is now active.
         </p>

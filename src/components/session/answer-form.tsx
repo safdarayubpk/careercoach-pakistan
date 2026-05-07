@@ -10,12 +10,13 @@ interface Props {
 export default function AnswerForm({ onSubmit, loading }: Props) {
   const [answer, setAnswer] = useState('')
   const [interimText, setInterimText] = useState('')
-  const [voiceSupported, setVoiceSupported] = useState(false)
+  const [voiceSupported] = useState(
+    () => typeof window !== 'undefined' && !!(window.SpeechRecognition || window.webkitSpeechRecognition)
+  )
   const [listening, setListening] = useState(false)
   const recognitionRef = useRef<SpeechRecognition | null>(null)
 
   useEffect(() => {
-    setVoiceSupported(!!(window.SpeechRecognition || window.webkitSpeechRecognition))
     return () => { recognitionRef.current?.abort() }
   }, [])
 
