@@ -1,4 +1,5 @@
 import AppNav from '@/components/layout/app-nav'
+import PageTransition from '@/components/layout/page-transition'
 
 export default function AppLayout({
   children,
@@ -16,7 +17,7 @@ export default function AppLayout({
       <AppNav />
       <main id="main-content" className="flex-1">
         <div className="max-w-5xl mx-auto px-4 py-8">
-          {children}
+          <PageTransition>{children}</PageTransition>
         </div>
       </main>
     </>
