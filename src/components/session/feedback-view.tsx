@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { motion, useMotionValue, useTransform, animate, useReducedMotion } from 'framer-motion'
 
 interface FeedbackData {
   score: number
@@ -23,6 +24,23 @@ function scoreLabel(score: number): string {
   return 'Needs Work'
 }
 
+function AnimatedScore({ score }: { score: number }) {
+  const prefersReducedMotion = useReducedMotion()
+  const count = useMotionValue(0)
+  const rounded = useTransform(count, (v) => Math.round(v))
+
+  useEffect(() => {
+    if (prefersReducedMotion) {
+      count.set(score)
+      return
+    }
+    const controls = animate(count, score, { duration: 0.6, ease: 'easeOut' })
+    return controls.stop
+  }, [score, count, prefersReducedMotion])
+
+  return <motion.span>{rounded}</motion.span>
+}
+
 export default function FeedbackView({
   feedback,
   unavailable,
@@ -30,6 +48,7 @@ export default function FeedbackView({
   onNext,
 }: Props) {
   const [modelOpen, setModelOpen] = useState(false)
+  const prefersReducedMotion = useReducedMotion()
 
   const nextLabel = isLastQuestion ? 'See Results →' : 'Next Question →'
 
@@ -49,12 +68,16 @@ export default function FeedbackView({
     )
   }
 
+  const correctBase = 0.4
+  const missingBase = correctBase + feedback.correct_points.length * 0.08 + 0.15
+  const tipDelay = missingBase + feedback.missing_points.length * 0.08 + 0.1
+
   return (
     <div className="space-y-4">
       {/* Score card */}
       <div className="rounded-xl bg-gradient-to-r from-[#1E40AF] to-[#3B82F6] p-6 text-center text-white">
         <div className="text-5xl font-bold leading-none">
-          {feedback.score}
+          <AnimatedScore score={feedback.score} />
           <span className="text-2xl opacity-70">/10</span>
         </div>
         <div className="mt-2 text-sm opacity-90">{scoreLabel(feedback.score)}</div>
@@ -62,43 +85,78 @@ export default function FeedbackView({
 
       {/* Correct points */}
       {feedback.correct_points.length > 0 && (
-        <div className="rounded-lg border border-green-200 bg-green-50 p-4">
+        <motion.div
+          className="rounded-lg border border-green-200 bg-green-50 p-4"
+          initial={prefersReducedMotion ? false : { opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, ease: 'easeOut', delay: correctBase }}
+        >
           <p className="mb-2 text-xs font-bold uppercase tracking-wide text-green-700">
             ✓ What you got right
           </p>
           <ul className="space-y-1">
             {feedback.correct_points.map((point, i) => (
-              <li key={i} className="text-sm text-green-800">
+              <motion.li
+                key={i}
+                className="text-sm text-green-800"
+                initial={prefersReducedMotion ? false : { opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{
+                  duration: 0.35,
+                  ease: 'easeOut',
+                  delay: correctBase + i * 0.08,
+                }}
+              >
                 • {point}
-              </li>
+              </motion.li>
             ))}
           </ul>
-        </div>
+        </motion.div>
       )}
 
       {/* Missing points */}
       {feedback.missing_points.length > 0 && (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+        <motion.div
+          className="rounded-lg border border-red-200 bg-red-50 p-4"
+          initial={prefersReducedMotion ? false : { opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, ease: 'easeOut', delay: missingBase }}
+        >
           <p className="mb-2 text-xs font-bold uppercase tracking-wide text-red-700">
             ✗ What was missing
           </p>
           <ul className="space-y-1">
             {feedback.missing_points.map((point, i) => (
-              <li key={i} className="text-sm text-red-800">
+              <motion.li
+                key={i}
+                className="text-sm text-red-800"
+                initial={prefersReducedMotion ? false : { opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{
+                  duration: 0.35,
+                  ease: 'easeOut',
+                  delay: missingBase + i * 0.08,
+                }}
+              >
                 • {point}
-              </li>
+              </motion.li>
             ))}
           </ul>
-        </div>
+        </motion.div>
       )}
 
       {/* Improve tip */}
-      <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
+      <motion.div
+        className="rounded-lg border border-blue-200 bg-blue-50 p-4"
+        initial={prefersReducedMotion ? false : { opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.4, ease: 'easeOut', delay: tipDelay }}
+      >
         <p className="mb-2 text-xs font-bold uppercase tracking-wide text-blue-700">
           💡 Improve
         </p>
         <p className="text-sm text-blue-800">{feedback.improve_tip}</p>
-      </div>
+      </motion.div>
 
       {/* Model answer toggle */}
       <div className="overflow-hidden rounded-lg border border-gray-200">
