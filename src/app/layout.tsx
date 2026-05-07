@@ -13,9 +13,27 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CareerCoach Pakistan — AI Interview Prep",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'),
+  title: 'CareerCoach Pakistan — AI Interview Prep',
   description:
-    "AI-powered interview preparation for Pakistani job seekers. Paste a JD, get tailored questions, receive instant feedback. PKR 999/month.",
+    'AI-powered interview preparation for Pakistani job seekers. Paste a JD, get tailored questions, receive instant feedback. PKR 999/month.',
+  openGraph: {
+    title: 'CareerCoach Pakistan — AI Interview Prep',
+    description:
+      'AI-powered interview preparation for Pakistani job seekers. Paste a JD, get tailored questions, receive instant feedback. PKR 999/month.',
+    url: '/',
+    siteName: 'CareerCoach Pakistan',
+    images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'CareerCoach Pakistan' }],
+    type: 'website',
+    locale: 'en_PK',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'CareerCoach Pakistan — AI Interview Prep',
+    description:
+      'AI-powered interview preparation for Pakistani job seekers. Paste a JD, get tailored questions, receive instant feedback. PKR 999/month.',
+    images: ['/opengraph-image'],
+  },
 };
 
 export default function RootLayout({
