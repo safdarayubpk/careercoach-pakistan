@@ -29,12 +29,9 @@ export default async function AppNav() {
         <Link href="/app/session/setup" className="hover:text-white/80 transition-colors">
           Sessions
         </Link>
-        <span
-          className="opacity-40 cursor-not-allowed select-none"
-          title="Coming in Phase 5"
-        >
+        <Link href="/app/billing" className="hover:text-white/80 transition-colors">
           Billing
-        </span>
+        </Link>
       </div>
       <div className="flex items-center gap-3">
         {avatarUrl ? (
@@ -50,6 +47,7 @@ export default async function AppNav() {
           </div>
         )}
         <span className="text-sm">{displayName}</span>
+        <span className="text-white/30 select-none">|</span>
         <SignOutButton />
       </div>
     </nav>
