@@ -6,9 +6,25 @@ export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
 export default async function OgImage() {
-  const interBold = await fetch(
-    new URL('https://fonts.gstatic.com/s/inter/v13/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuFuYAZ9hiJ-Ek-_EeA.woff2')
-  ).then((res) => res.arrayBuffer())
+  let interBoldData: ArrayBuffer | null = null
+
+  try {
+    const css = await fetch(
+      'https://fonts.googleapis.com/css2?family=Inter:wght@700&display=swap',
+      { headers: { 'User-Agent': 'Mozilla/5.0 (compatible; bot/1.0)' } }
+    ).then((res) => res.text())
+
+    const ttfUrl = css.match(/src: url\((.+?)\) format\('truetype'\)/)?.[1]
+    if (ttfUrl) {
+      interBoldData = await fetch(ttfUrl).then((res) => res.arrayBuffer())
+    }
+  } catch {
+    // Font fetch failed — render without custom font (graceful degradation)
+  }
+
+  const fonts: { name: string; data: ArrayBuffer; style: 'normal'; weight: 700 }[] = interBoldData
+    ? [{ name: 'Inter', data: interBoldData, style: 'normal', weight: 700 as const }]
+    : []
 
   return new ImageResponse(
     (
@@ -62,16 +78,6 @@ export default async function OgImage() {
         </div>
       </div>
     ),
-    {
-      ...size,
-      fonts: [
-        {
-          name: 'Inter',
-          data: interBold,
-          style: 'normal',
-          weight: 700,
-        },
-      ],
-    }
+    { ...size, fonts }
   )
 }
