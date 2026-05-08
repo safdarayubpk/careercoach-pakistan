@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { captureEvent } from '@/lib/analytics'
 
 export default function SubscribeButton() {
   const [loading, setLoading] = useState(false)
@@ -9,6 +10,7 @@ export default function SubscribeButton() {
   async function handleClick() {
     setLoading(true)
     setError(null)
+    captureEvent('upgrade_clicked')
 
     try {
       const res = await fetch('/api/checkout', { method: 'POST' })

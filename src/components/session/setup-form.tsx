@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { captureEvent } from '@/lib/analytics'
 import RoleAutocomplete from './role-autocomplete'
 import LevelSelector from './level-selector'
 import InterviewTypeSelector from './interview-type-selector'
@@ -40,6 +41,7 @@ export default function SetupForm() {
 
       if (!res.ok) throw new Error('Failed')
       const { sessionId } = await res.json()
+      captureEvent('session_started', { role: role.trim(), level, has_jd: !!jdTrimmed })
       router.push(`/app/session/${sessionId}/question`)
     } catch {
       setError("Couldn't generate questions. Try again.")

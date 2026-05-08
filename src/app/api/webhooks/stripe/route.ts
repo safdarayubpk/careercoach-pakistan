@@ -3,6 +3,21 @@ import { supabaseAdmin } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 import Stripe from 'stripe'
 
+async function captureServerEvent(event: string, distinctId: string) {
+  const key = process.env.POSTHOG_API_KEY
+  const host = process.env.NEXT_PUBLIC_POSTHOG_HOST ?? 'https://us.i.posthog.com'
+  if (!key) return
+  try {
+    await fetch(`${host}/capture/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ api_key: key, event, distinct_id: distinctId }),
+    })
+  } catch {
+    // analytics failure must never affect webhook response
+  }
+}
+
 export const dynamic = 'force-dynamic'
 
 export async function POST(request: Request) {
@@ -68,6 +83,7 @@ export async function POST(request: Request) {
           return NextResponse.json({ error: 'DB error' }, { status: 500 })
         }
 
+        await captureServerEvent('subscription_created', userId)
         break
       }
 
@@ -143,6 +159,7 @@ export async function POST(request: Request) {
           return NextResponse.json({ error: 'DB error' }, { status: 500 })
         }
 
+        await captureServerEvent('subscription_cancelled', subRow.user_id)
         break
       }
 

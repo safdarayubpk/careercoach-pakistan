@@ -1,5 +1,6 @@
 import AppNav from '@/components/layout/app-nav'
 import PageTransition from '@/components/layout/page-transition'
+import PostHogIdentify from '@/components/providers/PostHogIdentify'
 
 export default function AppLayout({
   children,
@@ -14,6 +15,7 @@ export default function AppLayout({
       >
         Skip to content
       </a>
+      <PostHogIdentify />
       <AppNav />
       <main id="main-content" className="flex-1">
         <div className="max-w-5xl mx-auto px-4 py-8">

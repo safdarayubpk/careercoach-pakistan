@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { captureEvent } from '@/lib/analytics'
 import QuestionCard from './question-card'
 import AnswerForm from './answer-form'
 import FeedbackView from './feedback-view'
@@ -61,6 +62,12 @@ export default function SessionPlayer({ question, session, questionNumber }: Pro
         setFeedbackUnavailable(true)
       } else if (res.ok) {
         setFeedback(data as FeedbackData)
+        if (questionNumber === 10) {
+          captureEvent('session_completed', {
+            session_id: session.id,
+            final_score: (data as FeedbackData).score,
+          })
+        }
       } else {
         setFeedbackUnavailable(true)
       }
