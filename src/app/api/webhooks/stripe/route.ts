@@ -69,8 +69,9 @@ export async function POST(request: Request) {
           )
 
         if (upsertErr) {
+          // Return 200 so Stripe does not retry — investigate DB manually
           console.error('[Stripe webhook] checkout.session.completed: subscriptions upsert failed', upsertErr)
-          return NextResponse.json({ error: 'DB error' }, { status: 500 })
+          return NextResponse.json({ received: true, warning: 'subscriptions upsert failed' })
         }
 
         const { error: userErr } = await supabaseAdmin
@@ -80,7 +81,7 @@ export async function POST(request: Request) {
 
         if (userErr) {
           console.error('[Stripe webhook] checkout.session.completed: users update failed', userErr)
-          return NextResponse.json({ error: 'DB error' }, { status: 500 })
+          return NextResponse.json({ received: true, warning: 'users is_subscribed update failed' })
         }
 
         await captureServerEvent('subscription_created', userId)
@@ -109,7 +110,7 @@ export async function POST(request: Request) {
 
         if (subUpdErr) {
           console.error('[Stripe webhook] subscription.updated: subscriptions update failed', subUpdErr)
-          return NextResponse.json({ error: 'DB error' }, { status: 500 })
+          return NextResponse.json({ received: true, warning: 'subscriptions status update failed' })
         }
 
         const { error: userUpdErr } = await supabaseAdmin
@@ -119,7 +120,7 @@ export async function POST(request: Request) {
 
         if (userUpdErr) {
           console.error('[Stripe webhook] subscription.updated: users update failed', userUpdErr)
-          return NextResponse.json({ error: 'DB error' }, { status: 500 })
+          return NextResponse.json({ received: true, warning: 'users is_subscribed update failed' })
         }
 
         break
@@ -146,7 +147,7 @@ export async function POST(request: Request) {
 
         if (cancelErr) {
           console.error('[Stripe webhook] subscription.deleted: subscriptions update failed', cancelErr)
-          return NextResponse.json({ error: 'DB error' }, { status: 500 })
+          return NextResponse.json({ received: true, warning: 'subscriptions cancel update failed' })
         }
 
         const { error: cancelUserErr } = await supabaseAdmin
@@ -156,7 +157,7 @@ export async function POST(request: Request) {
 
         if (cancelUserErr) {
           console.error('[Stripe webhook] subscription.deleted: users update failed', cancelUserErr)
-          return NextResponse.json({ error: 'DB error' }, { status: 500 })
+          return NextResponse.json({ received: true, warning: 'users is_subscribed cancel update failed' })
         }
 
         await captureServerEvent('subscription_cancelled', subRow.user_id)
