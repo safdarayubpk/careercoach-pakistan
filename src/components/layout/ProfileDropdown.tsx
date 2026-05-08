@@ -47,7 +47,7 @@ export default function ProfileDropdown({ displayName, email, initials, avatarUr
         aria-expanded={isOpen}
         aria-haspopup="true"
         aria-label="Open user menu"
-        className="flex items-center gap-2 rounded-full p-1 transition-colors hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
+        className="cursor-pointer flex items-center gap-2 rounded-full p-1 transition-colors hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
       >
         {avatarUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
