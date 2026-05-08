@@ -10,7 +10,7 @@ This file provides guidance to Claude Code when working in the `careercoach-paki
 Pakistani professionals pay PKR 999/month instead of PKR 7,000/month for global tools (Final Round AI, Huru.ai).
 Core differentiator: JD-paste → tailored questions + Urdu language support.
 
-**Status:** Phases 0–12 complete. All planned phases done.
+**Status:** Phases 0–12 complete. Post-launch audit done. App is production-ready.
 **Repo:** github.com/safdarayubpk/careercoach-pakistan
 **Deploy:** Vercel (full-stack, not static)
 
@@ -229,6 +229,8 @@ Phase 9: Urdu RTL layout (dir="auto" on answer surfaces, Noto Nastaliq Urdu font
 Phase 10: Analytics (Vercel Analytics + PostHog events + session replay) ✓ DONE
 Phase 11: Trial expiry email (Resend + Vercel cron, 24h before expiry) ✓ DONE
 Phase 12: Welcome email on new user signup (fire-and-forget in auth callback) ✓ DONE
+Phase 13: Post-launch audit (QA, Security, PM, Legal, DevOps) + fixes ✓ DONE
+Phase 14: Privacy Policy + Terms of Service pages ✓ DONE
 ```
 
 ## Key Conventions
@@ -260,6 +262,12 @@ Phase 12: Welcome email on new user signup (fire-and-forget in auth callback) �
 - Trial expiry email: `src/app/api/cron/trial-reminder/route.ts` — Vercel cron runs daily at 4 AM UTC (9 AM PKT), queries users expiring in next 24h (`is_subscribed=false`, `trial_reminder_sent=false`), sends via Resend, marks `trial_reminder_sent=true`; CRON_SECRET header prevents public triggering; `src/emails/TrialExpiryEmail.tsx` is the React Email template; `src/lib/resend.ts` is the client singleton
 - Welcome email: `src/app/auth/callback/route.ts` — detects new vs returning user by querying `users` table before upsert; if new, sends `WelcomeEmail` via Resend fire-and-forget (`.catch()` only, never blocks redirect); `src/emails/WelcomeEmail.tsx` is the template
 - DB: `users` table has `trial_reminder_sent boolean NOT NULL DEFAULT false` column added in Phase 11
+- Security headers: `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy` added to `next.config.ts` headers array (microphone allowed for voice input)
+- Stripe webhook: all DB error branches return `200 { received: true, warning: '...' }` — never 500 — so Stripe does not retry indefinitely; DB failures are logged to console for manual investigation
+- Legal pages: `src/app/(marketing)/privacy/page.tsx` and `src/app/(marketing)/terms/page.tsx` — linked from FooterSection; cover PECA/GDPR basics, Stripe/Supabase/PostHog/Resend third parties, 7-day money-back, governing law (Pakistan)
+- README: fully rewritten with product overview, tech stack table, local dev setup, all env vars, project structure, and deployment notes
+- RLS verified: all 5 tables (answers, questions, sessions, subscriptions, users) have RLS enabled with correct `auth.uid()` conditions; Stripe webhook and cron use `supabaseAdmin` to bypass RLS by design
+- Pending manual actions: (1) verify questions RLS INSERT policy joins via sessions table, (2) set up support@careercoach.pk email forward, (3) confirm all 14 env vars set in Vercel Production
 
 ## Skills Installed
 
