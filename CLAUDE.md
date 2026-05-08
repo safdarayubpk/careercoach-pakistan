@@ -10,7 +10,7 @@ This file provides guidance to Claude Code when working in the `careercoach-paki
 Pakistani professionals pay PKR 999/month instead of PKR 7,000/month for global tools (Final Round AI, Huru.ai).
 Core differentiator: JD-paste → tailored questions + Urdu language support.
 
-**Status:** Phases 0–11 complete. All planned phases done.
+**Status:** Phases 0–12 complete. All planned phases done.
 **Repo:** github.com/safdarayubpk/careercoach-pakistan
 **Deploy:** Vercel (full-stack, not static)
 
@@ -198,6 +198,7 @@ docs/superpowers/specs/
   2026-05-09-urdu-rtl.md                          ← Phase 9: Urdu RTL layout ✓ DONE
   2026-05-09-analytics.md                         ← Phase 10: Analytics ✓ DONE
   2026-05-09-trial-expiry-email.md                ← Phase 11: Trial expiry email ✓ DONE
+  2026-05-09-welcome-email.md                     ← Phase 12: Welcome email ✓ DONE
 
 docs/superpowers/plans/
   2026-05-05-interview-session-ai-feedback.md
@@ -227,6 +228,7 @@ Phase 8: Launch prep (domain, env vars, Vercel deploy, smoke test, SEO, favicon,
 Phase 9: Urdu RTL layout (dir="auto" on answer surfaces, Noto Nastaliq Urdu font) ✓ DONE
 Phase 10: Analytics (Vercel Analytics + PostHog events + session replay) ✓ DONE
 Phase 11: Trial expiry email (Resend + Vercel cron, 24h before expiry) ✓ DONE
+Phase 12: Welcome email on new user signup (fire-and-forget in auth callback) ✓ DONE
 ```
 
 ## Key Conventions
@@ -256,6 +258,7 @@ Phase 11: Trial expiry email (Resend + Vercel cron, 24h before expiry) ✓ DONE
 - PostHog events: `session_started` (setup-form), `session_completed` (session-player, last question), `upgrade_clicked` (subscribe-button); server-side: `subscription_created`, `subscription_cancelled` via REST fetch in Stripe webhook — analytics failure must never affect webhook response (wrapped in try/catch)
 - Vercel Analytics: `<Analytics />` from `@vercel/analytics/react` in root layout — automatic page views + Core Web Vitals
 - Trial expiry email: `src/app/api/cron/trial-reminder/route.ts` — Vercel cron runs daily at 4 AM UTC (9 AM PKT), queries users expiring in next 24h (`is_subscribed=false`, `trial_reminder_sent=false`), sends via Resend, marks `trial_reminder_sent=true`; CRON_SECRET header prevents public triggering; `src/emails/TrialExpiryEmail.tsx` is the React Email template; `src/lib/resend.ts` is the client singleton
+- Welcome email: `src/app/auth/callback/route.ts` — detects new vs returning user by querying `users` table before upsert; if new, sends `WelcomeEmail` via Resend fire-and-forget (`.catch()` only, never blocks redirect); `src/emails/WelcomeEmail.tsx` is the template
 - DB: `users` table has `trial_reminder_sent boolean NOT NULL DEFAULT false` column added in Phase 11
 
 ## Skills Installed
