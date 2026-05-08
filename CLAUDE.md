@@ -10,7 +10,7 @@ This file provides guidance to Claude Code when working in the `careercoach-paki
 Pakistani professionals pay PKR 999/month instead of PKR 7,000/month for global tools (Final Round AI, Huru.ai).
 Core differentiator: JD-paste → tailored questions + Urdu language support.
 
-**Status:** Phases 0–9 complete. All planned phases done.
+**Status:** Phases 0–10 complete. Phase 11 (trial expiry email) next.
 **Repo:** github.com/safdarayubpk/careercoach-pakistan
 **Deploy:** Vercel (full-stack, not static)
 
@@ -22,6 +22,7 @@ Core differentiator: JD-paste → tailored questions + Urdu language support.
 - **AI Engine:** Groq API — LLaMA 3.3 70B (fast inference for feedback)
 - **Payments:** Stripe (subscription, PKR 999/month)
 - **Animations:** Framer Motion
+- **Analytics:** Vercel Analytics (page views + web vitals) + PostHog (custom events, session replay)
 - **Package Manager:** pnpm
 - **Deployment:** Vercel
 
@@ -55,6 +56,11 @@ NEXT_PUBLIC_STRIPE_PRICE_ID=
 
 # App
 NEXT_PUBLIC_SITE_URL=https://careercoach.pk
+
+# PostHog (US Cloud)
+NEXT_PUBLIC_POSTHOG_KEY=phc_...
+NEXT_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com
+POSTHOG_API_KEY=phc_...   # same key, used server-side in Stripe webhook
 ```
 
 ## Architecture
@@ -185,6 +191,7 @@ docs/superpowers/specs/
   2026-05-07-animations.md                        ← Phase 7b: App animations ✓ DONE
   2026-05-07-launch-prep.md                       ← Phase 8: Launch prep ✓ DONE
   2026-05-09-urdu-rtl.md                          ← Phase 9: Urdu RTL layout ✓ DONE
+  2026-05-09-analytics.md                         ← Phase 10: Analytics ✓ DONE
 
 docs/superpowers/plans/
   2026-05-05-interview-session-ai-feedback.md
@@ -212,6 +219,8 @@ Phase 6: Landing page (marketing, pricing, CTA) ✓ DONE
 Phase 7: Polish (animations, mobile, accessibility) ✓ DONE
 Phase 8: Launch prep (domain, env vars, Vercel deploy, smoke test, SEO, favicon, sticky nav, profile dropdown) ✓ DONE
 Phase 9: Urdu RTL layout (dir="auto" on answer surfaces, Noto Nastaliq Urdu font) ✓ DONE
+Phase 10: Analytics (Vercel Analytics + PostHog events + session replay) ✓ DONE
+Phase 11: Trial expiry email ← NEXT
 ```
 
 ## Key Conventions
@@ -237,6 +246,9 @@ Phase 9: Urdu RTL layout (dir="auto" on answer surfaces, Noto Nastaliq Urdu font
 - Voice input — cross-platform: `continuous = false` + `onend` auto-restart via `listeningRef` (ref, not state). Fixes Android bugs: duplicate text (resultIndex reset on internal restart) and recording appearing stopped. Desktop unchanged. Do NOT switch back to `continuous = true`.
 - Urdu RTL: `dir="auto"` on `<textarea>` and interim `<p>` in `answer-form.tsx`, and on `answer_text` `<p>` in `report-accordion.tsx` — browser auto-detects direction via Unicode Bidi Algorithm
 - Urdu font: Noto Nastaliq Urdu loaded via `next/font/google` (self-hosted), exposed as `--font-noto-nastaliq-urdu`; applied via `textarea[dir="auto"], p[dir="auto"]` in `globals.css`; Noto Nastaliq has no Latin glyphs so English falls through to system-ui
+- Analytics: `src/components/providers/PostHogProvider.tsx` (init + manual pageview tracking) wraps root layout; `src/components/providers/PostHogIdentify.tsx` identifies authenticated users in app layout; `src/lib/analytics.ts` is the thin `captureEvent()` wrapper — always import from here, never posthog-js directly
+- PostHog events: `session_started` (setup-form), `session_completed` (session-player, last question), `upgrade_clicked` (subscribe-button); server-side: `subscription_created`, `subscription_cancelled` via REST fetch in Stripe webhook — analytics failure must never affect webhook response (wrapped in try/catch)
+- Vercel Analytics: `<Analytics />` from `@vercel/analytics/react` in root layout — automatic page views + Core Web Vitals
 
 ## Skills Installed
 
