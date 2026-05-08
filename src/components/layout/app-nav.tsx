@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import MobileDrawer from '@/components/layout/MobileDrawer'
 import ProfileDropdown from '@/components/layout/ProfileDropdown'
+import NavLinks from '@/components/layout/NavLinks'
 
 export default async function AppNav() {
   const supabase = await createClient()
@@ -22,38 +23,36 @@ export default async function AppNav() {
   return (
     <nav
       aria-label="App navigation"
-      className="sticky top-0 z-40 bg-[#1E40AF] text-white px-6 py-3 flex items-center justify-between"
+      className="sticky top-0 z-40 bg-[#1E40AF] text-white px-6 py-3 flex items-center"
     >
-      <span className="font-bold text-lg">CareerCoach PK</span>
-
-      {/* Desktop nav links — hidden on mobile */}
-      <div className="hidden md:flex items-center gap-6 text-sm">
-        <Link href="/app/dashboard" className="hover:text-white/80 transition-colors">
-          Dashboard
-        </Link>
-        <Link href="/app/session/setup" className="hover:text-white/80 transition-colors">
-          Sessions
-        </Link>
-        <Link href="/app/billing" className="hover:text-white/80 transition-colors">
-          Billing
+      {/* Left — logo (flex-1 so it takes equal space) */}
+      <div className="flex-1">
+        <Link
+          href="/app/dashboard"
+          className="font-bold text-lg hover:text-white/90 transition-colors"
+        >
+          CareerCoach PK
         </Link>
       </div>
 
-      {/* Desktop user dropdown — hidden on mobile */}
-      <ProfileDropdown
-        displayName={displayName}
-        email={email}
-        initials={initials}
-        avatarUrl={avatarUrl}
-      />
+      {/* Centre — nav links, truly centred (hidden on mobile) */}
+      <NavLinks />
 
-      {/* Mobile hamburger — MobileDrawer renders the ☰ button and the drawer */}
-      <MobileDrawer
-        displayName={displayName}
-        email={email}
-        initials={initials}
-        avatarUrl={avatarUrl}
-      />
+      {/* Right — profile dropdown + mobile hamburger (flex-1 so it mirrors left) */}
+      <div className="flex-1 flex items-center justify-end gap-2">
+        <ProfileDropdown
+          displayName={displayName}
+          email={email}
+          initials={initials}
+          avatarUrl={avatarUrl}
+        />
+        <MobileDrawer
+          displayName={displayName}
+          email={email}
+          initials={initials}
+          avatarUrl={avatarUrl}
+        />
+      </div>
     </nav>
   )
 }
