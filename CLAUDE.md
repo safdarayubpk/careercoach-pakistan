@@ -10,7 +10,7 @@ This file provides guidance to Claude Code when working in the `careercoach-paki
 Pakistani professionals pay PKR 999/month instead of PKR 7,000/month for global tools (Final Round AI, Huru.ai).
 Core differentiator: JD-paste → tailored questions + Urdu language support.
 
-**Status:** Phases 0–8 complete. Phase 9 (Urdu RTL layout) next.
+**Status:** Phases 0–9 complete. All planned phases done.
 **Repo:** github.com/safdarayubpk/careercoach-pakistan
 **Deploy:** Vercel (full-stack, not static)
 
@@ -184,6 +184,7 @@ docs/superpowers/specs/
   2026-05-07-mobile-accessibility.md              ← Phase 7a: Mobile + WCAG 2.1 AA ✓ DONE
   2026-05-07-animations.md                        ← Phase 7b: App animations ✓ DONE
   2026-05-07-launch-prep.md                       ← Phase 8: Launch prep ✓ DONE
+  2026-05-09-urdu-rtl.md                          ← Phase 9: Urdu RTL layout ✓ DONE
 
 docs/superpowers/plans/
   2026-05-05-interview-session-ai-feedback.md
@@ -210,7 +211,7 @@ Phase 5: Subscription paywall (Stripe, trial logic, billing page) ✓ DONE
 Phase 6: Landing page (marketing, pricing, CTA) ✓ DONE
 Phase 7: Polish (animations, mobile, accessibility) ✓ DONE
 Phase 8: Launch prep (domain, env vars, Vercel deploy, smoke test, SEO, favicon, sticky nav, profile dropdown) ✓ DONE
-Phase 9: Urdu RTL layout (deferred from Phase 7) ← NEXT
+Phase 9: Urdu RTL layout (dir="auto" on answer surfaces, Noto Nastaliq Urdu font) ✓ DONE
 ```
 
 ## Key Conventions
@@ -233,6 +234,8 @@ Phase 9: Urdu RTL layout (deferred from Phase 7) ← NEXT
 - OG image: `src/app/opengraph-image.tsx` — edge runtime, loads Inter Bold via Google Fonts CSS2 API (TTF, non-browser UA); woff2 is NOT supported by Satori
 - SEO files: `robots.ts` (allow `/`, disallow `/app/`), `sitemap.ts` (landing only), `manifest.ts` (PWA) — all auto-wired by Next.js App Router conventions
 - Voice input error: `src/components/session/answer-form.tsx` — mic permission denied shows inline `<p role="alert">` (no `alert()` calls)
+- Urdu RTL: `dir="auto"` on `<textarea>` and interim `<p>` in `answer-form.tsx`, and on `answer_text` `<p>` in `report-accordion.tsx` — browser auto-detects direction via Unicode Bidi Algorithm
+- Urdu font: Noto Nastaliq Urdu loaded via `next/font/google` (self-hosted), exposed as `--font-noto-nastaliq-urdu`; applied via `textarea[dir="auto"], p[dir="auto"]` in `globals.css`; Noto Nastaliq has no Latin glyphs so English falls through to system-ui
 
 ## Skills Installed
 
