@@ -10,7 +10,7 @@ This file provides guidance to Claude Code when working in the `careercoach-paki
 Pakistani professionals pay PKR 999/month instead of PKR 7,000/month for global tools (Final Round AI, Huru.ai).
 Core differentiator: JD-paste → tailored questions + Urdu language support.
 
-**Status:** Phases 0–10 complete. Phase 11 (trial expiry email) next.
+**Status:** Phases 0–11 complete. All planned phases done.
 **Repo:** github.com/safdarayubpk/careercoach-pakistan
 **Deploy:** Vercel (full-stack, not static)
 
@@ -23,6 +23,7 @@ Core differentiator: JD-paste → tailored questions + Urdu language support.
 - **Payments:** Stripe (subscription, PKR 999/month)
 - **Animations:** Framer Motion
 - **Analytics:** Vercel Analytics (page views + web vitals) + PostHog (custom events, session replay)
+- **Email:** Resend (transactional email)
 - **Package Manager:** pnpm
 - **Deployment:** Vercel
 
@@ -61,6 +62,10 @@ NEXT_PUBLIC_SITE_URL=https://careercoach.pk
 NEXT_PUBLIC_POSTHOG_KEY=phc_...
 NEXT_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com
 POSTHOG_API_KEY=phc_...   # same key, used server-side in Stripe webhook
+
+# Resend + Cron
+RESEND_API_KEY=re_...
+CRON_SECRET=<openssl rand -hex 32>
 ```
 
 ## Architecture
@@ -192,6 +197,7 @@ docs/superpowers/specs/
   2026-05-07-launch-prep.md                       ← Phase 8: Launch prep ✓ DONE
   2026-05-09-urdu-rtl.md                          ← Phase 9: Urdu RTL layout ✓ DONE
   2026-05-09-analytics.md                         ← Phase 10: Analytics ✓ DONE
+  2026-05-09-trial-expiry-email.md                ← Phase 11: Trial expiry email ✓ DONE
 
 docs/superpowers/plans/
   2026-05-05-interview-session-ai-feedback.md
@@ -220,7 +226,7 @@ Phase 7: Polish (animations, mobile, accessibility) ✓ DONE
 Phase 8: Launch prep (domain, env vars, Vercel deploy, smoke test, SEO, favicon, sticky nav, profile dropdown) ✓ DONE
 Phase 9: Urdu RTL layout (dir="auto" on answer surfaces, Noto Nastaliq Urdu font) ✓ DONE
 Phase 10: Analytics (Vercel Analytics + PostHog events + session replay) ✓ DONE
-Phase 11: Trial expiry email ← NEXT
+Phase 11: Trial expiry email (Resend + Vercel cron, 24h before expiry) ✓ DONE
 ```
 
 ## Key Conventions
@@ -249,6 +255,8 @@ Phase 11: Trial expiry email ← NEXT
 - Analytics: `src/components/providers/PostHogProvider.tsx` (init + manual pageview tracking) wraps root layout; `src/components/providers/PostHogIdentify.tsx` identifies authenticated users in app layout; `src/lib/analytics.ts` is the thin `captureEvent()` wrapper — always import from here, never posthog-js directly
 - PostHog events: `session_started` (setup-form), `session_completed` (session-player, last question), `upgrade_clicked` (subscribe-button); server-side: `subscription_created`, `subscription_cancelled` via REST fetch in Stripe webhook — analytics failure must never affect webhook response (wrapped in try/catch)
 - Vercel Analytics: `<Analytics />` from `@vercel/analytics/react` in root layout — automatic page views + Core Web Vitals
+- Trial expiry email: `src/app/api/cron/trial-reminder/route.ts` — Vercel cron runs daily at 4 AM UTC (9 AM PKT), queries users expiring in next 24h (`is_subscribed=false`, `trial_reminder_sent=false`), sends via Resend, marks `trial_reminder_sent=true`; CRON_SECRET header prevents public triggering; `src/emails/TrialExpiryEmail.tsx` is the React Email template; `src/lib/resend.ts` is the client singleton
+- DB: `users` table has `trial_reminder_sent boolean NOT NULL DEFAULT false` column added in Phase 11
 
 ## Skills Installed
 
