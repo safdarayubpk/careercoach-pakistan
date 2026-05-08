@@ -234,6 +234,7 @@ Phase 9: Urdu RTL layout (dir="auto" on answer surfaces, Noto Nastaliq Urdu font
 - OG image: `src/app/opengraph-image.tsx` — edge runtime, loads Inter Bold via Google Fonts CSS2 API (TTF, non-browser UA); woff2 is NOT supported by Satori
 - SEO files: `robots.ts` (allow `/`, disallow `/app/`), `sitemap.ts` (landing only), `manifest.ts` (PWA) — all auto-wired by Next.js App Router conventions
 - Voice input error: `src/components/session/answer-form.tsx` — mic permission denied shows inline `<p role="alert">` (no `alert()` calls)
+- Voice input — cross-platform: `continuous = false` + `onend` auto-restart via `listeningRef` (ref, not state). Fixes Android bugs: duplicate text (resultIndex reset on internal restart) and recording appearing stopped. Desktop unchanged. Do NOT switch back to `continuous = true`.
 - Urdu RTL: `dir="auto"` on `<textarea>` and interim `<p>` in `answer-form.tsx`, and on `answer_text` `<p>` in `report-accordion.tsx` — browser auto-detects direction via Unicode Bidi Algorithm
 - Urdu font: Noto Nastaliq Urdu loaded via `next/font/google` (self-hosted), exposed as `--font-noto-nastaliq-urdu`; applied via `textarea[dir="auto"], p[dir="auto"]` in `globals.css`; Noto Nastaliq has no Latin glyphs so English falls through to system-ui
 
