@@ -16,44 +16,53 @@ export default function AnswerForm({ onSubmit, loading }: Props) {
   const [listening, setListening] = useState(false)
   const [micError, setMicError] = useState(false)
   const recognitionRef = useRef<SpeechRecognition | null>(null)
+  // Ref (not state) so onend always reads the latest intended value without stale closure
+  const listeningRef = useRef(false)
 
   useEffect(() => {
-    return () => { recognitionRef.current?.abort() }
+    return () => {
+      listeningRef.current = false
+      recognitionRef.current?.abort()
+    }
   }, [])
 
-  function handleVoice() {
+  function startRecognition() {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition
-    if (!SR) return
-
-    if (listening) {
-      recognitionRef.current?.stop()
-      return
-    }
+    if (!SR || !listeningRef.current) return
 
     const recognition = new SR()
     recognition.lang = 'ur-PK'
-    recognition.interimResults = true   // live preview as you speak
-    recognition.continuous = true       // keep listening until user clicks Stop
+    recognition.interimResults = true
+    // continuous = false: single-utterance mode fixes two Android bugs —
+    // (1) duplicate text from resultIndex resetting on internal restart,
+    // (2) recording appearing stopped when Android kills the session.
+    // onend auto-restarts as long as listeningRef.current is true.
+    recognition.continuous = false
     recognitionRef.current = recognition
 
-    recognition.onstart = () => { setListening(true); setMicError(false) }
     recognition.onend = () => {
-      setListening(false)
       setInterimText('')
-    }
-    recognition.onerror = (e: SpeechRecognitionErrorEvent) => {
-      setListening(false)
-      setInterimText('')
-      if (e.error === 'not-allowed') {
-        setMicError(true)
+      if (listeningRef.current) {
+        startRecognition() // seamless restart — user never needs to tap again
       }
     }
+
+    recognition.onerror = (e: SpeechRecognitionErrorEvent) => {
+      setInterimText('')
+      if (e.error === 'not-allowed') {
+        listeningRef.current = false
+        setListening(false)
+        setMicError(true)
+      }
+      // Other errors (no-speech, network, aborted): onend fires next and
+      // restarts if listeningRef.current is still true.
+    }
+
     recognition.onresult = (e: SpeechRecognitionEvent) => {
       let interim = ''
       for (let i = e.resultIndex; i < e.results.length; i++) {
         const transcript = e.results[i][0].transcript
         if (e.results[i].isFinal) {
-          // Append finalized speech to the saved answer
           setAnswer(prev => (prev ? `${prev} ${transcript}` : transcript))
         } else {
           interim += transcript
@@ -63,6 +72,23 @@ export default function AnswerForm({ onSubmit, loading }: Props) {
     }
 
     recognition.start()
+  }
+
+  function handleVoice() {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition
+    if (!SR) return
+
+    if (listeningRef.current) {
+      listeningRef.current = false
+      setListening(false)
+      recognitionRef.current?.stop()
+      return
+    }
+
+    listeningRef.current = true
+    setListening(true)
+    setMicError(false)
+    startRecognition()
   }
 
   const isValid = answer.trim().length >= 10
@@ -81,7 +107,6 @@ export default function AnswerForm({ onSubmit, loading }: Props) {
         disabled={loading}
         className="w-full min-h-[120px] resize-none rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-[#1E40AF] focus:outline-none focus:ring-1 focus:ring-[#1E40AF]"
       />
-      {/* Live interim transcription preview */}
       {interimText && (
         <p dir="auto" className="mt-1 text-xs italic text-gray-400">{interimText}…</p>
       )}
