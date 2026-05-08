@@ -22,7 +22,7 @@ export default async function AppNav() {
   return (
     <nav
       aria-label="App navigation"
-      className="bg-[#1E40AF] text-white px-6 py-3 flex items-center justify-between"
+      className="sticky top-0 z-40 bg-[#1E40AF] text-white px-6 py-3 flex items-center justify-between"
     >
       <span className="font-bold text-lg">CareerCoach PK</span>
 
