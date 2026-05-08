@@ -9,3 +9,11 @@ body {
   outline: 2px solid #1E40AF;
   outline-offset: 2px;
 }
+
+/* Urdu RTL — applied to user-generated content surfaces only.
+   Noto Nastaliq has no Latin glyphs; the browser falls through to system-ui
+   for English characters, so LTR text in these elements renders correctly. */
+textarea[dir="auto"],
+p[dir="auto"] {
+  font-family: var(--font-noto-nastaliq-urdu), 'Noto Naskh Arabic', system-ui, sans-serif;
+}

@@ -83,7 +83,7 @@ export default function ReportAccordion({ items }: Props) {
                     Your Answer
                   </p>
                   {answer ? (
-                    <p className="rounded-md bg-gray-50 px-3 py-2 text-sm text-gray-700">
+                    <p dir="auto" className="rounded-md bg-gray-50 px-3 py-2 text-sm text-gray-700">
                       {answer.answer_text}
                     </p>
                   ) : (

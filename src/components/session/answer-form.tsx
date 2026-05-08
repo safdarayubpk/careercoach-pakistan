@@ -73,6 +73,7 @@ export default function AnswerForm({ onSubmit, loading }: Props) {
         Your Answer
       </label>
       <textarea
+        dir="auto"
         value={answer}
         onChange={e => setAnswer(e.target.value)}
         rows={5}
@@ -82,7 +83,7 @@ export default function AnswerForm({ onSubmit, loading }: Props) {
       />
       {/* Live interim transcription preview */}
       {interimText && (
-        <p className="mt-1 text-xs italic text-gray-400">{interimText}…</p>
+        <p dir="auto" className="mt-1 text-xs italic text-gray-400">{interimText}…</p>
       )}
       {!interimText && answer.trim().length > 0 && answer.trim().length < 10 && (
         <p className="mt-1 text-xs text-gray-400">Please give a more complete answer.</p>
