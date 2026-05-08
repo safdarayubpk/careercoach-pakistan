@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
-import SignOutButton from '@/components/auth/sign-out-button'
 import Link from 'next/link'
 import MobileDrawer from '@/components/layout/MobileDrawer'
+import ProfileDropdown from '@/components/layout/ProfileDropdown'
 
 export default async function AppNav() {
   const supabase = await createClient()
@@ -39,24 +39,13 @@ export default async function AppNav() {
         </Link>
       </div>
 
-      {/* Desktop user section — hidden on mobile */}
-      <div className="hidden md:flex items-center gap-3">
-        {avatarUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={avatarUrl}
-            alt={displayName}
-            className="w-8 h-8 rounded-full object-cover"
-          />
-        ) : (
-          <div className="w-8 h-8 rounded-full bg-blue-300 flex items-center justify-center text-sm font-semibold text-blue-900">
-            {initials}
-          </div>
-        )}
-        <span className="text-sm">{displayName}</span>
-        <span className="text-white/30 select-none">|</span>
-        <SignOutButton />
-      </div>
+      {/* Desktop user dropdown — hidden on mobile */}
+      <ProfileDropdown
+        displayName={displayName}
+        email={email}
+        initials={initials}
+        avatarUrl={avatarUrl}
+      />
 
       {/* Mobile hamburger — MobileDrawer renders the ☰ button and the drawer */}
       <MobileDrawer
