@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import SignOutButton from '@/components/auth/sign-out-button'
 
@@ -15,6 +16,7 @@ interface Props {
 export default function MobileDrawer({ displayName, email, initials, avatarUrl }: Props) {
   const [isOpen, setIsOpen] = useState(false)
   const prefersReducedMotion = useReducedMotion()
+  const pathname = usePathname()
   const drawerRef = useRef<HTMLDivElement>(null)
   const hamburgerRef = useRef<HTMLButtonElement>(null)
 
@@ -146,27 +148,27 @@ export default function MobileDrawer({ displayName, email, initials, avatarUrl }
 
               {/* Nav links */}
               <nav className="flex-1 py-2" aria-label="Drawer navigation">
-                <Link
-                  href="/app/dashboard"
-                  onClick={close}
-                  className="flex min-h-[48px] items-center gap-3 border-b border-gray-100 px-4 text-sm text-gray-700 hover:bg-gray-50"
-                >
-                  📊 Dashboard
-                </Link>
-                <Link
-                  href="/app/session/setup"
-                  onClick={close}
-                  className="flex min-h-[48px] items-center gap-3 border-b border-gray-100 px-4 text-sm text-gray-700 hover:bg-gray-50"
-                >
-                  💬 Sessions
-                </Link>
-                <Link
-                  href="/app/billing"
-                  onClick={close}
-                  className="flex min-h-[48px] items-center gap-3 border-b border-gray-100 px-4 text-sm text-gray-700 hover:bg-gray-50"
-                >
-                  💳 Billing
-                </Link>
+                {[
+                  { href: '/app/dashboard', label: '📊 Dashboard' },
+                  { href: '/app/session/setup', label: '💬 Sessions' },
+                  { href: '/app/billing', label: '💳 Billing' },
+                ].map(({ href, label }) => {
+                  const isActive = pathname === href || (href !== '/app/dashboard' && pathname.startsWith(href))
+                  return (
+                    <Link
+                      key={href}
+                      href={href}
+                      onClick={close}
+                      className={`flex min-h-[48px] items-center gap-3 border-b border-gray-100 px-4 text-sm transition-colors ${
+                        isActive
+                          ? 'bg-blue-50 font-semibold text-[#1E40AF] border-l-4 border-l-[#1E40AF]'
+                          : 'text-gray-700 hover:bg-gray-50'
+                      }`}
+                    >
+                      {label}
+                    </Link>
+                  )
+                })}
               </nav>
 
               {/* Sign out footer */}

@@ -14,6 +14,7 @@ export default function AnswerForm({ onSubmit, loading }: Props) {
     () => typeof window !== 'undefined' && !!(window.SpeechRecognition || window.webkitSpeechRecognition)
   )
   const [listening, setListening] = useState(false)
+  const [micError, setMicError] = useState(false)
   const recognitionRef = useRef<SpeechRecognition | null>(null)
 
   useEffect(() => {
@@ -35,7 +36,7 @@ export default function AnswerForm({ onSubmit, loading }: Props) {
     recognition.continuous = true       // keep listening until user clicks Stop
     recognitionRef.current = recognition
 
-    recognition.onstart = () => setListening(true)
+    recognition.onstart = () => { setListening(true); setMicError(false) }
     recognition.onend = () => {
       setListening(false)
       setInterimText('')
@@ -44,7 +45,7 @@ export default function AnswerForm({ onSubmit, loading }: Props) {
       setListening(false)
       setInterimText('')
       if (e.error === 'not-allowed') {
-        alert('Microphone access denied')
+        setMicError(true)
       }
     }
     recognition.onresult = (e: SpeechRecognitionEvent) => {
@@ -110,6 +111,11 @@ export default function AnswerForm({ onSubmit, loading }: Props) {
           </button>
         )}
       </div>
+      {micError && (
+        <p role="alert" className="mt-2 text-xs text-red-600">
+          Microphone access denied. Please allow microphone access in your browser settings.
+        </p>
+      )}
     </div>
   )
 }

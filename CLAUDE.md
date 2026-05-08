@@ -10,7 +10,7 @@ This file provides guidance to Claude Code when working in the `careercoach-paki
 Pakistani professionals pay PKR 999/month instead of PKR 7,000/month for global tools (Final Round AI, Huru.ai).
 Core differentiator: JD-paste → tailored questions + Urdu language support.
 
-**Status:** Phases 0–7 complete. Phase 8 (Launch prep) next.
+**Status:** Phases 0–8 complete. Phase 9 (Urdu RTL layout) next.
 **Repo:** github.com/safdarayubpk/careercoach-pakistan
 **Deploy:** Vercel (full-stack, not static)
 
@@ -145,8 +145,11 @@ Response must always be valid JSON — use `response_format: { type: "json_objec
 - Landing page: Split hero — left pitch + CTA, right live product preview mockup
 - Landing nav: Logo + Features/Pricing anchor links + Google-branded "Sign in with Google" button (white bg, colored G, Roboto font). Sticky top-0. Nav links hidden on mobile.
 - Landing page sections: HeroSection → FeaturesSection → PricingSection → FooterSection (each its own component in `src/components/landing/`)
-- App shell: Blue top nav bar (#1E40AF) — logo left, nav links center (Dashboard | Sessions | Billing), avatar + name + | + Sign out right. On mobile (`< md`): logo left, ☰ hamburger right → slide-in MobileDrawer from right
-- Mobile nav drawer: `src/components/layout/MobileDrawer.tsx` (Client Component) — user info header (blue), nav links with 48px touch targets, Sign out footer. AppNav stays Server Component.
+- App shell: Blue top nav bar (#1E40AF) — logo left, nav links center (Dashboard | Sessions | Billing), avatar+chevron ProfileDropdown right. On mobile (`< md`): logo left, ☰ hamburger right → slide-in MobileDrawer from right
+- Mobile nav drawer: `src/components/layout/MobileDrawer.tsx` (Client Component) — user info header (blue), nav links with 48px touch targets + active state (blue left border), Sign out footer. AppNav stays Server Component.
+- Nav active state: desktop `NavLinks.tsx` and mobile `MobileDrawer.tsx` both use `usePathname()` — active link highlighted (white underline on desktop, blue left-border on mobile)
+- Profile dropdown: `src/components/layout/ProfileDropdown.tsx` (Client Component) — avatar+chevron trigger, dropdown shows name/email, Billing link, red Sign Out; Framer Motion animation; closes on outside click/Escape
+- Favicon + PWA: `src/app/icon.svg` (blue rounded square + white C arc), `src/app/apple-icon.tsx` (180×180 ImageResponse), `src/app/manifest.ts` (PWA manifest), old `favicon.ico` deleted
 - Page transitions: `src/components/layout/page-transition.tsx` (Client Component) — AnimatePresence wraps children in app layout, fade+drift 0.25s entry / 0.15s exit, `useReducedMotion()` aware
 - Feedback reveal: score counter animates 0→actual (0.6s), correct/missing cards stagger in, improve tip fades in last — all in `src/components/session/feedback-view.tsx`
 - Skip-to-content link: first element in app layout, jumps to `id="main-content"` on the `<main>` element
@@ -180,6 +183,7 @@ docs/superpowers/specs/
   2026-05-06-landing-page.md                      ← Phase 6: Landing page ✓ DONE
   2026-05-07-mobile-accessibility.md              ← Phase 7a: Mobile + WCAG 2.1 AA ✓ DONE
   2026-05-07-animations.md                        ← Phase 7b: App animations ✓ DONE
+  2026-05-07-launch-prep.md                       ← Phase 8: Launch prep ✓ DONE
 
 docs/superpowers/plans/
   2026-05-05-interview-session-ai-feedback.md
@@ -189,6 +193,7 @@ docs/superpowers/plans/
   2026-05-06-landing-page.md
   2026-05-07-mobile-accessibility.md
   2026-05-07-animations.md
+  2026-05-07-launch-prep.md
 ```
 
 Always read the relevant spec before implementing a feature.
@@ -204,8 +209,8 @@ Phase 4: Session report + progress dashboard ✓ DONE
 Phase 5: Subscription paywall (Stripe, trial logic, billing page) ✓ DONE
 Phase 6: Landing page (marketing, pricing, CTA) ✓ DONE
 Phase 7: Polish (animations, mobile, accessibility) ✓ DONE
-Phase 8: Launch prep (domain, env vars, Vercel deploy, smoke test) ← NEXT
-Phase 9: Urdu RTL layout (deferred from Phase 7)
+Phase 8: Launch prep (domain, env vars, Vercel deploy, smoke test, SEO, favicon, sticky nav, profile dropdown) ✓ DONE
+Phase 9: Urdu RTL layout (deferred from Phase 7) ← NEXT
 ```
 
 ## Key Conventions
@@ -225,6 +230,9 @@ Phase 9: Urdu RTL layout (deferred from Phase 7)
 - Auth callback (`/auth/callback`) uses `supabaseAdmin` to upsert `public.users` — anon client is blocked by RLS
 - Score utilities in `src/lib/scores.ts` — `computeAverage`, `scoreLabel`, `scoreColor`
 - Session types in `src/types/session.ts`
+- OG image: `src/app/opengraph-image.tsx` — edge runtime, loads Inter Bold via Google Fonts CSS2 API (TTF, non-browser UA); woff2 is NOT supported by Satori
+- SEO files: `robots.ts` (allow `/`, disallow `/app/`), `sitemap.ts` (landing only), `manifest.ts` (PWA) — all auto-wired by Next.js App Router conventions
+- Voice input error: `src/components/session/answer-form.tsx` — mic permission denied shows inline `<p role="alert">` (no `alert()` calls)
 
 ## Skills Installed
 
