@@ -2,7 +2,7 @@
 
 AI-powered interview preparation for Pakistani job seekers — PKR 999/month instead of PKR 7,000/month for global tools.
 
-**Live:** [careercoach.pk](https://careercoach.pk)
+**Live:** [careercoach.pk](https://careercoach-pakistan.vercel.app/)
 
 ---
 
