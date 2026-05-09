@@ -3,7 +3,7 @@ import SignInButton from '@/components/auth/sign-in-button'
 export default function LandingNav() {
   return (
     <nav className="sticky top-0 z-50 flex items-center justify-between bg-[#1E40AF] px-6 py-3">
-      <a href="/" className="text-lg font-bold text-white no-underline">
+      <a href="/" className="py-2 text-lg font-bold text-white no-underline">
         CareerCoach PK
       </a>
       <div className="hidden items-center gap-6 text-sm md:flex">
