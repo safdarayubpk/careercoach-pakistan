@@ -66,8 +66,8 @@ export default function TermsPage() {
             <p>
               We offer a <strong>7-day money-back guarantee</strong> for new subscribers. If you are not
               satisfied within 7 days of your first payment, email us at{' '}
-              <a href="mailto:support@careercoach.pk" className="text-[#1E40AF] underline">
-                support@careercoach.pk
+              <a href="mailto:safdarayub@gmail.com" className="text-[#1E40AF] underline">
+                safdarayub@gmail.com
               </a>{' '}
               and we will issue a full refund. After 7 days, payments are non-refundable.
             </p>
@@ -139,8 +139,8 @@ export default function TermsPage() {
           <Section title="13. Contact">
             <p>
               Questions about these Terms? Email us at{' '}
-              <a href="mailto:support@careercoach.pk" className="text-[#1E40AF] underline">
-                support@careercoach.pk
+              <a href="mailto:safdarayub@gmail.com" className="text-[#1E40AF] underline">
+                safdarayub@gmail.com
               </a>
               .
             </p>

@@ -118,8 +118,8 @@ export default function PrivacyPage() {
             </ul>
             <p className="mt-3">
               To exercise any of these rights, email us at{' '}
-              <a href="mailto:support@careercoach.pk" className="text-[#1E40AF] underline">
-                support@careercoach.pk
+              <a href="mailto:safdarayub@gmail.com" className="text-[#1E40AF] underline">
+                safdarayub@gmail.com
               </a>
               . We will respond within 30 days.
             </p>
@@ -144,8 +144,8 @@ export default function PrivacyPage() {
           <Section title="10. Contact">
             <p>
               Questions about this policy? Email us at{' '}
-              <a href="mailto:support@careercoach.pk" className="text-[#1E40AF] underline">
-                support@careercoach.pk
+              <a href="mailto:safdarayub@gmail.com" className="text-[#1E40AF] underline">
+                safdarayub@gmail.com
               </a>
               .
             </p>
