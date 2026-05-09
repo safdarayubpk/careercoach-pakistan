@@ -99,7 +99,7 @@ export default function ProfileDropdown({ displayName, email, initials, avatarUr
               href="/app/billing"
               onClick={() => setIsOpen(false)}
               role="menuitem"
-              className="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+              className="flex cursor-pointer items-center gap-2.5 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
             >
               <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true">
                 <rect x="1" y="3" width="13" height="9" rx="1.5" stroke="currentColor" strokeWidth="1.3" />
@@ -113,7 +113,7 @@ export default function ProfileDropdown({ displayName, email, initials, avatarUr
 
             {/* Sign out */}
             <div className="px-2 py-1">
-              <SignOutButton className="flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors" />
+              <SignOutButton className="flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-2 py-2 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors" />
             </div>
           </motion.div>
         )}
